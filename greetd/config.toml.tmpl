@@ -1,0 +1,12 @@
+[terminal]
+vt = 1
+
+[default_session]
+# XKB_DEFAULT_LAYOUT/VARIANT/OPTIONS are filled in by bootstrap.sh from
+# `localectl status` -- i.e. whatever layout you already chose in the
+# CachyOS installer -- and written to ~/.config/sway/local.conf.d/ to match
+# (see sway/config's tail). Both have to agree, or the greeter's login
+# prompt and your actual session read different layouts (correct passwords
+# look like failed logins).
+command = "env {{XKB_ENV}} cage -s -- regreet"
+user = "greeter"

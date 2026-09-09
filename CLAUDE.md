@@ -41,12 +41,15 @@ mkinitcpio, limine cmdline, root-owned `/etc/greetd/*`) live in
   writeup: `docs/hibernate-swap-luks.md`. All three pieces are in
   `bootstrap.sh`. Regressed 2026-09-06 after the 2026-09-05 verification,
   once the dGPU was actively bound — hadn't hit the chwd interaction before.
-- **Greetd's keyboard layout must match sway/config's own layout exactly**
-  — a real, previously-confusing bug on the machine this was built on
-  (correct passwords looking like failed logins because the greeter and
-  the real session were reading different layouts), not an oversight.
-  Both default to plain US QWERTY here; if you customize one, customize
-  the other the same way.
+- **Greetd's keyboard layout must match the real sway session's layout
+  exactly** — a real, previously-confusing bug (correct passwords looking
+  like failed logins because the greeter and the real session were reading
+  different layouts), not an oversight. `bootstrap.sh` derives both from
+  `localectl status` (whatever the CachyOS installer set) rather than a
+  hardcoded default — don't reintroduce a hardcoded layout in
+  `sway/config`/`greetd/config.toml.tmpl`; that's what caused this bug once
+  already, just with a different fixed value ("us" instead of a personal
+  Dvorak default).
 - **`kdeglobals-file`** is named that way (not just `kdeglobals`) because it's
   a single file, not a directory, and the existing `link()` helper in
   `setup.sh` assumes directory-shaped sources elsewhere — check `setup.sh`

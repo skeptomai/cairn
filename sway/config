@@ -9,12 +9,15 @@ set $menu walker
 font pango:JetBrainsMono Nerd Font 10
 
 ### Input
-# Defaults to plain US QWERTY. If you use a different layout/variant (the
-# original author uses Dvorak + ctrl:swapcaps), set it here -- and make the
-# *same* change in greetd/config.toml's XKB_DEFAULT_* env vars, or the
-# greeter's login prompt and your actual session will use different
-# layouts (a real, previously-confusing bug: correct passwords looking
-# like failed logins because you're typing them in the wrong layout).
+# Plain US QWERTY here is just a fallback default. bootstrap.sh detects
+# whatever layout you actually chose in the CachyOS installer (via
+# `localectl`) and writes the real value to
+# ~/.config/sway/local.conf.d/10-keyboard.conf (untracked, included below,
+# and processed after this block so it wins) -- and matches it in
+# greetd/config.toml.tmpl, since the greeter and this session are separate
+# processes that don't otherwise share a layout. If bootstrap.sh hasn't run
+# yet, or you want a different layout than what it detected, edit that
+# local.conf.d file directly rather than this one.
 input "type:keyboard" {
     xkb_layout us
 }

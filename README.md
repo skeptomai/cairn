@@ -48,12 +48,14 @@ palette schema and how to add a new preset or app.
    `resume=UUID=...`/`resume_offset=...` to the Limine kernel cmdline.
    Confirmed working via a real hibernate → power-cycle → resume cycle
    on 2026-09-05.
-3. Installs `/etc/greetd/config.toml` and `/etc/greetd/regreet.toml` — its
-   `XKB_DEFAULT_*` env vars must match `sway/config`'s own keyboard layout
-   exactly (both default to plain US QWERTY; if you customize one, customize
-   the other the same way). A mismatch here makes correctly-typed passwords
-   look like login failures, since the greeter and your real session would
-   be reading different layouts. Enables `greetd.service`.
+3. Installs `/etc/greetd/config.toml` (rendered from `greetd/config.toml.tmpl`
+   using `localectl`'s currently-configured layout — whatever you picked in
+   the CachyOS installer, not a hardcoded default) and `/etc/greetd/regreet.toml`,
+   and writes the same layout to `~/.config/sway/local.conf.d/10-keyboard.conf`
+   so the real session matches. These have to agree, or correctly-typed
+   passwords look like login failures — the greeter and your real session
+   are separate processes reading separate layout config. Enables
+   `greetd.service`.
 4. Installs `/usr/share/wayland-sessions/sway-uwsm.desktop` — the session
    entry the greeter lists, launching Sway via UWSM.
 5. Enables `tailscaled.service`. Joining the tailnet itself
@@ -151,8 +153,11 @@ journalctl -b <next-boot-idx> | grep -i resume  # should show "PM: Image signatu
 ### Login at the greeter fails even with the right password
 
 Check `/etc/greetd/config.toml`'s `XKB_DEFAULT_*` env vars actually match
-the real session's keyboard layout/options — a mismatch here means what you
-type at the greeter isn't what you think it is.
+`~/.config/sway/local.conf.d/10-keyboard.conf` — a mismatch here means what
+you type at the greeter isn't what you think it is. Re-running
+`bootstrap.sh` regenerates both from `localectl status`; if that's still
+wrong, fix it with `localectl set-x11-keymap <layout> [variant] [options]`
+and re-run.
 
 ### Waybar/walker/swaync not appearing or misconfigured
 

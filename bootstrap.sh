@@ -245,18 +245,37 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# greetd + regreet: keyboard layout must match the real session
-#
-# Why: if the greeter's XKB layout ever differs from sway/config's own
-# `input "type:keyboard"` block, the password typed at the greeter doesn't
-# match what's actually being sent -- login appears to silently fail. If
-# you customize your layout (see sway/config's comment on that block),
-# make the same change in greetd/config.toml's XKB_DEFAULT_* env vars.
+# Keyboard layout: read whatever you already chose in the CachyOS installer
+# (via localectl) instead of hardcoding one -- an earlier version of this
+# script hardcoded "us" here, which silently overrode a Dvorak (or any
+# other non-US) layout chosen at install time. Both the greeter and the
+# real sway session need the SAME layout or a correctly-typed password at
+# the greeter looks like a failed login (they're separate processes, so
+# this can't just be set once and inherited).
 # ---------------------------------------------------------------------------
+XKB_LAYOUT="$(localectl status | sed -n 's/^\s*X11 Layout:\s*//p')"
+XKB_VARIANT="$(localectl status | sed -n 's/^\s*X11 Variant:\s*//p')"
+XKB_OPTIONS="$(localectl status | sed -n 's/^\s*X11 Options:\s*//p')"
+XKB_LAYOUT="${XKB_LAYOUT:-us}"
+echo "==> Detected keyboard layout: $XKB_LAYOUT${XKB_VARIANT:+ (variant: $XKB_VARIANT)}${XKB_OPTIONS:+ (options: $XKB_OPTIONS)}"
 
-echo "==> Installing greetd config (keyboard layout must match sway/config -- see its comment)"
-sudo install -m 644 greetd/config.toml /etc/greetd/config.toml
+XKB_ENV="XKB_DEFAULT_LAYOUT=$XKB_LAYOUT"
+[ -n "$XKB_VARIANT" ] && XKB_ENV="$XKB_ENV XKB_DEFAULT_VARIANT=$XKB_VARIANT"
+[ -n "$XKB_OPTIONS" ] && XKB_ENV="$XKB_ENV XKB_DEFAULT_OPTIONS=$XKB_OPTIONS"
+
+echo "==> Installing greetd config (keyboard layout matched to the session below)"
+sed "s#{{XKB_ENV}}#$XKB_ENV#" greetd/config.toml.tmpl | sudo tee /etc/greetd/config.toml >/dev/null
 sudo install -m 644 greetd/regreet.toml /etc/greetd/regreet.toml
+
+echo "==> Writing matching sway keyboard layout to ~/.config/sway/local.conf.d/ (not tracked in git -- see sway/config's tail)"
+mkdir -p "$HOME/.config/sway/local.conf.d"
+{
+  echo "input \"type:keyboard\" {"
+  echo "    xkb_layout $XKB_LAYOUT"
+  [ -n "$XKB_VARIANT" ] && echo "    xkb_variant $XKB_VARIANT"
+  [ -n "$XKB_OPTIONS" ] && echo "    xkb_options $XKB_OPTIONS"
+  echo "}"
+} > "$HOME/.config/sway/local.conf.d/10-keyboard.conf"
 [ -f /etc/greetd/wallpaper.png ] || echo "    NOTE: /etc/greetd/wallpaper.png not present -- copy one manually (not tracked in git, it's a 24MB binary)"
 sudo systemctl enable greetd.service
 
