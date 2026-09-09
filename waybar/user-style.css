@@ -1,0 +1,136 @@
+/* User custom styles */
+
+/* Three floating lozenges instead of one continuous bar.
+ * window#waybar itself stays transparent; each modules-* group gets its
+ * own pill background so the gaps between them show the desktop through. */
+window#waybar {
+    background: transparent;
+}
+
+#waybar {
+    background: transparent;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+    background-color: @main-bg;
+    color: @main-fg;
+    border-radius: 16px;
+    padding: 2px 12px;
+    margin: 4px 6px;
+}
+
+/* Give the center pill a sensible floor so it looks proportionate to the
+ * side lozenges even with a short (or empty) window title, instead of
+ * shrinking to an awkward stub. */
+.modules-center {
+    min-width: 320px;
+}
+
+#window {
+    min-width: 296px;
+}
+
+/* Boxed, well-delineated workspace numbers */
+#workspaces button {
+    min-width: 22px;
+    padding: 0;
+    margin: 4px 2px;
+    border-radius: 4px;
+    border: 1px solid @wb-hvr-bg;
+    background-color: @main-bg;
+    color: @main-fg;
+}
+
+#workspaces button.focused {
+    background-color: @wb-hvr-bg;
+    color: @wb-hvr-fg;
+    border-color: @wb-hvr-bg;
+}
+
+#workspaces button:hover {
+    background-color: @wb-hvr-bg;
+    color: @wb-hvr-fg;
+    border-color: @wb-hvr-bg;
+}
+
+/* Right lozenge: each cluster is now a real waybar "group" box (see
+ * config-sway.jsonc), so the pill background/radius/margin lives on the
+ * group container itself — not on every member individually. That's the
+ * whole point: one shared box reads as "these belong together" instead of
+ * a row of same-sized standalone chips that merely share a tint. */
+#tray-cluster {
+    background-color: @tray-tint;
+    border-radius: 6px;
+    padding: 0 6px;
+    margin: 2px 1px;
+}
+
+#net-cluster {
+    background-color: @net-tint;
+    border-radius: 6px;
+    padding: 0 6px;
+    margin: 2px 1px;
+}
+
+#sys-cluster {
+    background-color: @sys-tint;
+    border-radius: 6px;
+    padding: 0 6px;
+    margin: 2px 1px;
+}
+
+/* Small breathing room between members within a group, with no per-member
+ * background/radius — that's what keeps them merged into one pill. */
+#tray-cluster #custom-notification,
+#tray-cluster #idle_inhibitor,
+#tray-cluster #tray,
+#tray-cluster #custom-power,
+#net-cluster #network,
+#net-cluster #pulseaudio,
+#net-cluster #backlight,
+#sys-cluster #cpu,
+#sys-cluster #memory,
+#sys-cluster #battery {
+    margin: 0 7px;
+}
+
+/* These two are single icon-only glyphs whose built-in font bearing leans
+ * left (extra blank space baked into the character itself) — nudge padding
+ * asymmetrically to compensate, since CSS can't fix glyph-internal spacing. */
+#idle_inhibitor {
+    padding-left: 2px;
+    padding-right: 10px;
+}
+
+#battery {
+    padding-left: 3px;
+    padding-right: 8px;
+}
+
+#custom-separator {
+    color: @wb-hvr-bg;
+    opacity: 0.6;
+    margin: 0 2px;
+}
+
+/* Notification bell: color-coded by swaync's reported state (the "class"
+ * field swaync-client emits — .none/.notification/.dnd-none/.dnd-notification/
+ * .inhibited-*). format-icons/{icon} don't work for custom modules (they're
+ * percentage-indexed, not state-keyed) so this is CSS-only, deliberately. */
+#custom-notification {
+    color: @main-fg;
+}
+
+#custom-notification.notification,
+#custom-notification.dnd-notification,
+#custom-notification.inhibited-notification,
+#custom-notification.dnd-inhibited-notification {
+    color: @danger;
+}
+
+#custom-notification.dnd-none,
+#custom-notification.dnd-inhibited-none {
+    opacity: 0.5;
+}

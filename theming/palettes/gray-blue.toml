@@ -1,0 +1,32 @@
+# The palette this desktop has actually been running since 2026-09.
+# Promoted to a real named preset so the theme switcher has zero regression
+# against the current live look.
+name = "Gray Blue"
+mode = "dark"
+
+bg = "#262626"
+fg = "#d9d9d9"
+bg-alt = "#3d3d3d"
+hover-bg = "#a6a6a6"
+hover-fg = "#262626"
+accent = "#61afef"
+danger = "#e06c75"
+selection = "#5e81ac"
+
+black   = "#262626"
+red     = "#e06c75"
+green   = "#98c379"
+yellow  = "#d8a657"
+blue    = "#61afef"
+magenta = "#c678dd"
+cyan    = "#56b6c2"
+white   = "#d9d9d9"
+
+bright-black   = "#4b4b4b"
+bright-red     = "#e06c75"
+bright-green   = "#98c379"
+bright-yellow  = "#e5c07b"
+bright-blue    = "#61afef"
+bright-magenta = "#c678dd"
+bright-cyan    = "#56b6c2"
+bright-white   = "#ffffff"

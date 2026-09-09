@@ -1,0 +1,170 @@
+# Package list for the CachyOS + SwayFX desktop stack (see ../CLAUDE.md).
+# Installed with: sudo pacman -S --needed - < packages.txt   (official repos)
+#                 yay -S --needed <pkg>                       (AUR — see AUR_PACKAGES below)
+#
+# One line per package. Comments (#) and blank lines are ignored by setup.sh.
+# Regenerated 2026-09-06 against `pacman -Qqen`/`pacman -Qqem` to close drift
+# that had accumulated since the initial 2026-09-05 commit — this file had
+# stopped tracking most packages installed over the course of the Sway build-out.
+
+# --- Compositor / session ---
+# swayfx is AUR (see AUR_PACKAGES in bootstrap.sh), not installed from here.
+# It's the official `cachyos`-repo binary (not the AUR `swayfx-git` this
+# used to be), but plain pacman can't install it on its own: it depends on
+# wlroots0.19, which has no prebuilt package anywhere, so yay is still
+# needed to resolve+build that one AUR dependency. A `chaotic-aur/swayfx`
+# build exists that needs zero building at all (depends on wlroots0.20
+# instead), but chaotic-aur is NOT a repo this box configures anywhere --
+# found 2026-09-08 the hard way, blocking an entire fresh VM install with
+# `error: database not found: chaotic-aur`. Don't reach for it again
+# without actually adding real repo setup (Server=/keyring steps) to
+# bootstrap.sh first.
+swaybg
+swayidle
+swaylock
+greetd
+greetd-agreety
+greetd-regreet
+cage
+# uwsm: what sway-uwsm.desktop's Exec actually invokes -- without this,
+# the only remaining session entry (see bootstrap.sh's sway.desktop.disabled
+# step) fails at the greeter with "uwsm not found" and login is impossible.
+# Found 2026-09-07 completely missing on the VM; on the dev machine it turned out to
+# be an orphaned transitive dependency (`pacman -Qi uwsm` shows "Required
+# By: None" despite "Install Reason: dependency") -- nothing here ever
+# actually depended on it explicitly, so it was never guaranteed by a
+# fresh bootstrap.sh run either.
+uwsm
+# autotiling: sway has no built-in dwindle-style auto split (Hyprland does);
+# this reproduces it over sway's IPC -- see sway/config's `exec autotiling`.
+autotiling
+
+# --- Install/theme orchestration ---
+gum
+
+# --- Bar / launcher / notifications / OSD / power menu ---
+waybar
+walker
+# elephant-bin + elephant-desktopapplications-bin are AUR — walker's actual
+# search backend/provider; see AUR_PACKAGES in bootstrap.sh. Without these,
+# walker's window opens but silently finds nothing.
+swaync
+swayosd
+wlogout
+
+# --- Terminal / shell ---
+alacritty
+ghostty
+zsh
+zsh-autosuggestions
+zsh-completions
+zsh-history-substring-search
+zsh-theme-powerlevel10k
+
+# --- File managers / editor ---
+thunar
+# gvfs: trash/mount support for thunar. tumbler: thumbnail generation.
+gvfs
+tumbler
+yazi
+neovim
+
+# --- Theming ---
+kvantum
+kvantum-qt5
+qt6ct
+# adw-gtk-theme: the actual adw-gtk3/adw-gtk3-dark GTK3 themes the
+# theming pipeline's light/dark mode picks between (theming/apply-theme.py's
+# MODE_DEFAULTS) -- found missing from this file 2026-09-07 despite being
+# load-bearing for every palette's GTK3 rendering, light or dark; only
+# "worked" because it happened to already be installed.
+adw-gtk-theme
+# ttf-jetbrains-mono-nerd / ttf-cascadia-mono-nerd / ttf-cascadia-code-nerd:
+# the actual fonts sway/config (bar), ghostty/config (font-family =
+# "CaskaydiaMono Nerd Font", an exact match to ttf-cascadia-mono-nerd's
+# family name), and waybar/walker all reference. Found 2026-09-07
+# completely missing here -- the dev machine only had them via a manual
+# ~/.local/share/fonts install (home-directory-only, invisible to any
+# script), and the VM had neither that nor these packages at all, which
+# produced ghostty's font-fallback silently rendering at a much larger
+# cell size than intended -- surfaced as btop refusing to run ("terminal
+# too small") in a window that was actually plenty big in pixels.
+ttf-jetbrains-mono-nerd
+ttf-cascadia-mono-nerd
+ttf-cascadia-code-nerd
+fastfetch
+# chromium: tracked here specifically (unlike firefox/discord/etc., which
+# are deliberately NOT tracked -- personal app choices, see the note near
+# the bottom of this file) because theming/apply-theme.py retints
+# its toolbar/tab color on every theme switch via Chromium's managed
+# enterprise-policy mechanism (--refresh-platform-policy, upstream since
+# Chrome ~142 -- the plain official package works, no fork/AUR needed).
+chromium
+# imagemagick: generates the color-swatch preview PNGs for the walker/
+# elephant theme picker (theming/generate-previews.py). Not otherwise
+# a hard dependency of the theming system itself.
+imagemagick
+
+# --- Tray / networking extras ---
+# blueman: bluetooth tray icon + manager.
+# network-manager-applet (nm-applet): the wifi tray icon/picker.
+# tailscale: daemon enabled by bootstrap.sh; `sudo tailscale up` still needs
+# a manual interactive login (browser auth), not scripted.
+blueman
+network-manager-applet
+tailscale
+
+# --- Modern CLI tool replacements (aliased in zsh/conf.d/10-shell.zsh) ---
+zoxide
+eza
+bat
+fd
+ripgrep
+duf
+dust
+git-delta
+btop
+
+# --- Build tooling (needed to bootstrap yay itself, see bootstrap.sh) ---
+git
+base-devel
+
+# --- Desktop infrastructure (silently broken without these, but not pulled
+#     in transitively by anything else above) ---
+# pipewire itself IS a transitive dep already; these aren't.
+wireplumber
+pipewire-alsa
+pipewire-jack
+pipewire-pulse
+# GUI privilege-elevation dialogs (polkit-gnome) and screen-share/file-picker
+# portals (xdg-desktop-portal-wlr) -- various apps silently misbehave without these.
+polkit-gnome
+xdg-desktop-portal-wlr
+# clipboard manager + wallpaper picker + auto-mount for removable media
+cliphist
+wl-clip-persist
+waypaper
+udiskie
+# laptop power management
+power-profiles-daemon
+switcheroo-control
+upower
+# rofi: themed launcher, used alongside walker (see waybar-font-style-preference.md)
+rofi
+# ssh client -- used constantly for remote/cluster work
+openssh
+
+# --- Firewall ---
+# Actively enabled + configured on the dev machine (custom virbr0/libvirt rules from VM
+# testing, route/FORWARD rules for wlan0) -- see VM-TESTING.md. Only
+# the package + enabling the service is captured here, not the live ruleset
+# itself (evolving, includes transient VM-test-specific rules not meant to be
+# "the standard config" -- a real re-provisioning would need to redo the ufw
+# rules by hand, see VM-TESTING.md's ufw section for the pattern).
+ufw
+ufw-extras
+
+# --- Diagnostics ---
+# none of these are required to boot the desktop, but are assumed present
+# by bootstrap.sh's verification steps:
+#   btrfs-progs (mkinitcpio resume_offset lookups)

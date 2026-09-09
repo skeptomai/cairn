@@ -1,0 +1,10 @@
+for f in "${XDG_CONFIG_HOME:-$HOME/.config}"/uwsm/env-sway.d/*.sh; do
+  if [[ -r "$f" ]]; then
+    source "$f"
+  fi
+done
+
+# This file is sourced by uwsm to set environment variables specific to Sway.
+# You can add or modify Sway-specific environment variables in the files located in ~/.config/uwsm/env-sway.d/*.sh.
+# Create a new file: ~/.config/uwsm/env-sway.d/my_sway_env.sh
+# This is used to set environment variables that should be available globally in your Sway session.

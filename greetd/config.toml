@@ -1,0 +1,10 @@
+[terminal]
+vt = 1
+
+[default_session]
+# XKB_DEFAULT_LAYOUT/VARIANT/OPTIONS here must match sway/config's own
+# `input "type:keyboard"` block exactly -- if they differ, the greeter's
+# login prompt and your actual session use different layouts (correct
+# passwords look like failed logins).
+command = "env XKB_DEFAULT_LAYOUT=us cage -s -- regreet"
+user = "greeter"

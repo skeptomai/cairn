@@ -1,0 +1,31 @@
+# Gruvbox Dark (medium contrast) — canonical values from the gruvbox project,
+# not algorithmically derived.
+name = "Gruvbox"
+mode = "dark"
+
+bg = "#282828"
+fg = "#ebdbb2"
+bg-alt = "#3c3836"
+hover-bg = "#504945"
+hover-fg = "#ebdbb2"
+accent = "#d79921"
+danger = "#cc241d"
+selection = "#458588"
+
+black   = "#282828"
+red     = "#cc241d"
+green   = "#98971a"
+yellow  = "#d79921"
+blue    = "#458588"
+magenta = "#b16286"
+cyan    = "#689d6a"
+white   = "#a89984"
+
+bright-black   = "#928374"
+bright-red     = "#fb4934"
+bright-green   = "#b8bb26"
+bright-yellow  = "#fabd2f"
+bright-blue    = "#83a598"
+bright-magenta = "#d3869b"
+bright-cyan    = "#8ec07c"
+bright-white   = "#ebdbb2"

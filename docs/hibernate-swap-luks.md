@@ -1,0 +1,140 @@
+# Disk Layout, Hibernate, and Swap Tuning
+
+Undocumented until now — captured from live system state 2026-09-03. None of
+this is Omarchy-specific; it's standard Arch mkinitcpio/kernel-cmdline/systemd
+config and needs to be manually replicated on any reinstall (Omarchy, base
+Arch, CachyOS, whatever).
+
+## Disk layout
+
+- LUKS full-disk encryption: `cryptdevice=PARTUUID=<partition>:root` →
+  `/dev/mapper/root`
+- btrfs on top, subvolume `@` as root (`rootflags=subvol=@`), snapper-managed
+  snapshots
+- 30.7G swapfile at `/swap/swapfile` (btrfs swapfile, `pri=0` in fstab) —
+  doubles as the hibernation image target
+
+## zram + swapfile split
+
+`/etc/systemd/zram-generator.conf`:
+```
+[zram0]
+zram-size = 15739
+compression-algorithm = zstd
+```
+zram0 is sized to match RAM and given swap priority 100 (vs the swapfile's
+`pri=0`), so the kernel prefers zram for normal swap pressure and only falls
+back to the disk swapfile when zram is exhausted — or during hibernate, which
+needs a real disk-backed image.
+
+`zswap.enabled=0` on the kernel cmdline is paired with this: zswap is a
+compressed cache *in front of* a swap device, and with zram itself already
+being a compressed RAM device, stacking zswap on top would double-compress
+for no benefit. Disabled deliberately, not an oversight.
+
+`/etc/sysctl.d/99-omarchy-sysctl.conf` (`vm.swappiness=150`,
+`vm.vfs_cache_pressure=50`, `vm.page-cluster=0`, dirty-page tuning) is all
+zram-aware tuning — see the comments in that file, they're self-documenting.
+This one came from Omarchy and would need to be copied out (it's not
+Hyprland/GPU-specific, but it is real chosen tuning worth keeping).
+
+## Kernel cmdline
+
+```
+resume=/dev/mapper/root resume_offset=<offset> cryptdevice=PARTUUID=...:root
+root=/dev/mapper/root zswap.enabled=0 rootflags=subvol=@ rw
+rootfstype=btrfs initramfs_async=0
+```
+
+`resume_offset` is the physical extent offset of the swapfile within the
+btrfs filesystem — this number is **specific to this exact swapfile and will
+change** if the swapfile is ever recreated (defragmented, resized, or a fresh
+filesystem). Recompute with `btrfs inspect-internal map-swapfile -r
+/swap/swapfile` after any reinstall or swapfile recreation; don't reuse the
+old number.
+
+`initramfs_async=0` is an Omarchy-authored workaround
+(`/etc/limine-entry-tool.d/omarchy-initramfs-async.conf`) for a kernel 7.1
+upstream bug: async initramfs unpacking races early `/proc`/`/sys`/`/dev`
+mounts, which makes Plymouth exit before it can read `/proc/cmdline`, and the
+LUKS password prompt falls back to unthemed text. Not GPU-related, but a real
+boot-correctness fix to carry forward until upstream fixes the race — check
+if still needed on whatever kernel version a reinstall lands on.
+
+## mkinitcpio: the GPU/hibernate interaction (missing from [[hybrid-gpu-intel-nvidia]])
+
+The NVIDIA DRM modules must be **excluded from early KMS** (not loaded in the
+initramfs) specifically because loading them that early conflicts with
+`NVreg_PreserveVideoMemoryAllocations=1` (see [[hybrid-gpu-intel-nvidia]])
+during hibernate resume — the two together cause resume failures/corruption
+(kernel reads the hibernation image fine, then "PM: hibernation: Failed to
+load image, recovering" / "resume failed (-5)", silently falling through to
+a cold boot that looks like hibernate killed every process). This is the
+other half of that doc's hibernate note ("Keep
+`NVreg_PreserveVideoMemoryAllocations=1` for proper suspend/resume") and
+needs to travel with it as one unit.
+
+**How to actually achieve the exclusion depends on the mkinitcpio setup —
+don't assume the old Omarchy mechanism below still applies.** Regressed for
+real on 2026-09-06 on the CachyOS install specifically because of this: the
+mechanism is not portable.
+
+Omarchy-era system (Hyprland, LUKS+btrfs, plain `/etc/mkinitcpio.conf`):
+```
+HOOKS=(base udev plymouth keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems resume fsck btrfs-overlayfs)
+# Removed for hibernate compatibility -- early KMS conflicts with NVreg_PreserveVideoMemoryAllocations
+# MODULES+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+```
+Here, simply never force-adding nvidia to `MODULES` was enough — the `kms`
+hook's `autodetect`-filtered auto-inclusion (`add_checked_modules`, which
+only adds a module if the corresponding driver is currently bound per
+`/sys/devices/*/uevent`) didn't happen to pick nvidia up in this setup.
+
+CachyOS (SwayFX, current, `bootstrap.sh`): this mechanism does
+**not** apply, because CachyOS's `chwd` hardware-detection tool
+auto-generates `/etc/mkinitcpio.conf.d/10-chwd.conf` containing an explicit
+`MODULES+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)` — this force-adds
+the modules unconditionally, bypassing `autodetect`/`kms` filtering
+entirely, so there's nothing to "just not force" here. `10-chwd.conf` itself
+is marked "PLEASE DO NOT EDIT IT" and gets regenerated by chwd (e.g. on
+driver reinstall), so patching it directly doesn't stick. The fix instead is
+a second, later-sorted `mkinitcpio.conf.d` drop-in that filters the nvidia
+entries back out of `MODULES` after chwd's file has already run:
+
+`/etc/mkinitcpio.conf.d/99-no-nvidia-early-kms.conf`:
+```
+mapfile -t MODULES < <(printf '%s\n' "${MODULES[@]}" | grep -vE '^nvidia(_drm|_modeset|_uvm)?$')
+```
+Installed automatically by `bootstrap.sh`, alongside the modprobe.d
+`NVreg_PreserveVideoMemoryAllocations=1` option and enabling
+`nvidia-hibernate.service`/`nvidia-suspend.service`/`nvidia-resume.service`.
+Verify with `sudo lsinitcpio /boot/<...>/initramfs | grep nvidia.*\.ko` —
+should show nothing.
+
+`resume` hook must come after `encrypt`/`block`/`filesystems` in `HOOKS` (as
+in the Omarchy example above) — order matters for mkinitcpio hooks in
+general. On CachyOS's `systemd`-hook-based initramfs, `resume` just needs to
+come after `autodetect`/`kms`, which `bootstrap.sh`'s `HOOKS=(... resume
+filesystems)` already satisfies.
+
+`btrfs-overlayfs` hook and `MODULES+=(thunderbolt)` (from
+`/etc/mkinitcpio.conf.d/thunderbolt_module.conf`, Omarchy-provided) are also
+present — thunderbolt is relevant for any dock/eGPU use on this laptop, worth
+keeping even though it's not GPU-driver-related.
+
+## Reinstall checklist derived from this doc
+
+1. Recreate LUKS + btrfs (`subvol=@`) layout
+2. Create swapfile, compute fresh `resume_offset`, set cmdline params
+   (`resume=`, `resume_offset=`, `cryptdevice=`, `zswap.enabled=0`)
+3. Configure `zram-generator.conf` (15739 = ~15.7GB, matches this machine's
+   RAM — recompute if RAM changes) + `99-omarchy-sysctl.conf` vm tuning
+4. Set `mkinitcpio.conf` `HOOKS` to include `encrypt` (LUKS setups) / `resume`,
+   `btrfs-overlayfs`, and **exclude nvidia/nvidia_modeset/nvidia_uvm/nvidia_drm
+   from early-KMS `MODULES`** — do this together with the modprobe.d NVIDIA
+   power management options from [[hybrid-gpu-intel-nvidia]]. Check whether
+   anything (like CachyOS's `chwd`) is force-adding those modules back via an
+   `/etc/mkinitcpio.conf.d/*.conf` drop-in before assuming a plain `MODULES=()`
+   in the base config is sufficient — see the CachyOS case above. Also
+   include `thunderbolt` in `MODULES`
+5. `initramfs_async=0` cmdline param if still needed on the target kernel

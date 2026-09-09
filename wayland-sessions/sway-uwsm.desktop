@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Sway (uwsm-managed)
+Comment=An i3-compatible Wayland compositor
+Exec=uwsm start -e -D sway sway
+TryExec=uwsm
+DesktopNames=sway;wlroots
+Type=Application

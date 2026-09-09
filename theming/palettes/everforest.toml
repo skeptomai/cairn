@@ -1,0 +1,31 @@
+# Everforest Dark (medium contrast) — canonical values from the everforest
+# project, not algorithmically derived.
+name = "Everforest"
+mode = "dark"
+
+bg = "#2d353b"
+fg = "#d3c6aa"
+bg-alt = "#343f44"
+hover-bg = "#4f5b58"
+hover-fg = "#d3c6aa"
+accent = "#a7c080"
+danger = "#e67e80"
+selection = "#543a48"
+
+black   = "#4b565c"
+red     = "#e67e80"
+green   = "#a7c080"
+yellow  = "#dbbc7f"
+blue    = "#7fbbb3"
+magenta = "#d699b6"
+cyan    = "#83c092"
+white   = "#d3c6aa"
+
+bright-black   = "#4b565c"
+bright-red     = "#e67e80"
+bright-green   = "#a7c080"
+bright-yellow  = "#dbbc7f"
+bright-blue    = "#7fbbb3"
+bright-magenta = "#d699b6"
+bright-cyan    = "#83c092"
+bright-white   = "#e8e3e0"

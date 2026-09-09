@@ -1,0 +1,174 @@
+# Sway config — hand-written, mirrors the keybind layout from the
+# CachyOS/HyDE Hyprland setup this replaces (see ~/.config/hypr) so
+# muscle memory transfers. waybar is used instead of swaybar.
+
+set $mod Mod4
+set $term ghostty
+set $menu walker
+
+font pango:JetBrainsMono Nerd Font 10
+
+### Input
+# Defaults to plain US QWERTY. If you use a different layout/variant (the
+# original author uses Dvorak + ctrl:swapcaps), set it here -- and make the
+# *same* change in greetd/config.toml's XKB_DEFAULT_* env vars, or the
+# greeter's login prompt and your actual session will use different
+# layouts (a real, previously-confusing bug: correct passwords looking
+# like failed logins because you're typing them in the wrong layout).
+input "type:keyboard" {
+    xkb_layout us
+}
+input "type:touchpad" {
+    tap enabled
+    natural_scroll enabled
+    accel_profile flat
+}
+
+### Idle / lock
+exec swayidle -w \
+    lock 'swaylock -f -c 1b1e26' \
+    timeout 300 'swaylock -f -c 1b1e26' \
+    timeout 600 'swaymsg "output * dpms off"' \
+        resume 'swaymsg "output * dpms on"' \
+    before-sleep 'swaylock -f -c 1b1e26'
+bindsym $mod+l exec swaylock -f -c 1b1e26
+
+### Autostart
+# autotiling: sway has no dwindle-style auto split like Hyprland (always
+# splitv unless manually toggled). This reproduces Hyprland's rule --
+# split along whichever axis the focused container is longer on -- via
+# IPC instead of a fixed direction.
+exec autotiling
+# waybar is a systemd --user service (waybar.service, see setup.sh) instead
+# of a plain exec here -- gives auto-restart on crash and journal logging,
+# same reasoning as elephant.service.
+exec waypaper --restore
+exec swayosd-server
+exec swaync
+exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+exec wl-paste --type text --watch cliphist store
+exec wl-paste --type image --watch cliphist store
+
+### Look
+gaps inner 3
+gaps outer 0
+default_border pixel 1
+corner_radius 10
+smart_corner_radius enable
+smart_borders on
+client.focused          #6fd6c2 #1b1e26 #e6e9ec #6fd6c2
+client.focused_inactive #2a3038 #1b1e26 #8a93a0 #2a3038
+client.unfocused        #2a3038 #1b1e26 #8a93a0 #2a3038
+
+### Basics
+floating_modifier $mod normal
+bindsym $mod+Return exec $term
+bindsym $mod+q kill
+bindsym $mod+d exec $menu
+bindsym $mod+space exec $menu
+bindsym $mod+shift+d exec rofi -show drun
+bindsym $mod+Shift+q reload
+bindsym $mod+Shift+e exec wlogout
+bindsym $mod+e exec thunar
+bindsym $mod+w exec firefox
+bindsym $mod+Shift+w exec waypaper --backend swaybg --folder /usr/share/wallpapers/cachyos-wallpapers
+bindsym $mod+Shift+g exec waypaper --config-file ~/.config/waypaper/greeter-config.ini --state-file ~/.local/state/waypaper/greeter-state.ini --backend none
+bindsym $mod+ctrl+shift+space exec walker -m menus:cachyosthemes
+
+### Focus
+bindsym $mod+Left  focus left
+bindsym $mod+Down  focus down
+bindsym $mod+Up    focus up
+bindsym $mod+Right focus right
+
+### Move
+bindsym $mod+Shift+Left  move left
+bindsym $mod+Shift+Down  move down
+bindsym $mod+Shift+Up    move up
+bindsym $mod+Shift+Right move right
+
+### Layout
+bindsym $mod+b splith
+bindsym $mod+v splitv
+bindsym $mod+f fullscreen
+bindsym $mod+shift+space floating toggle
+bindsym $mod+s layout stacking
+bindsym $mod+t layout tabbed
+bindsym $mod+shift+t layout toggle split
+bindsym $mod+a focus parent
+
+### Workspaces
+set $ws1 1
+set $ws2 2
+set $ws3 3
+set $ws4 4
+set $ws5 5
+set $ws6 6
+set $ws7 7
+set $ws8 8
+set $ws9 9
+set $ws10 10
+
+bindsym $mod+1 workspace number $ws1
+bindsym $mod+2 workspace number $ws2
+bindsym $mod+3 workspace number $ws3
+bindsym $mod+4 workspace number $ws4
+bindsym $mod+5 workspace number $ws5
+bindsym $mod+6 workspace number $ws6
+bindsym $mod+7 workspace number $ws7
+bindsym $mod+8 workspace number $ws8
+bindsym $mod+9 workspace number $ws9
+bindsym $mod+0 workspace number $ws10
+
+bindsym $mod+Shift+1 move container to workspace number $ws1
+bindsym $mod+Shift+2 move container to workspace number $ws2
+bindsym $mod+Shift+3 move container to workspace number $ws3
+bindsym $mod+Shift+4 move container to workspace number $ws4
+bindsym $mod+Shift+5 move container to workspace number $ws5
+bindsym $mod+Shift+6 move container to workspace number $ws6
+bindsym $mod+Shift+7 move container to workspace number $ws7
+bindsym $mod+Shift+8 move container to workspace number $ws8
+bindsym $mod+Shift+9 move container to workspace number $ws9
+bindsym $mod+Shift+0 move container to workspace number $ws10
+
+### Resize
+mode "resize" {
+    bindsym Left  resize shrink width 30px
+    bindsym Down  resize grow height 30px
+    bindsym Up    resize shrink height 30px
+    bindsym Right resize grow width 30px
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+### Window rules
+for_window [app_id="com.mitchellh.ghostty" title="btop"] floating enable, resize set 900 650, move position center
+for_window [app_id="blueman-manager"] floating enable, resize set 700 500, move position center
+
+### Screenshots / clipboard
+bindsym Print exec grim ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png
+bindsym $mod+Print exec grim -g "$(slurp)" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png
+bindsym $mod+shift+v exec cliphist list | rofi -dmenu | cliphist decode | wl-copy
+
+### Media / hardware keys
+bindsym XF86AudioRaiseVolume exec swayosd-client --output-volume raise
+bindsym XF86AudioLowerVolume exec swayosd-client --output-volume lower
+bindsym XF86AudioMute exec swayosd-client --output-volume mute-toggle
+bindsym XF86AudioMicMute exec swayosd-client --input-volume mute-toggle
+bindsym XF86MonBrightnessUp exec swayosd-client --brightness raise
+bindsym XF86MonBrightnessDown exec swayosd-client --brightness lower
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+
+bar {
+    mode invisible
+}
+
+include /etc/sway/config.d/*
+
+# Per-machine overrides that don't belong in this shared config (e.g. the VM
+# test environment's virtual output resolution) -- not tracked in this repo,
+# safe no-op if the directory doesn't exist. See VM-TESTING.md.
+include ~/.config/sway/local.conf.d/*

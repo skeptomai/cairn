@@ -1,0 +1,6 @@
+/* HyDE is no longer installed on this box — the hyprdots.css/wallbash
+ * imports this file used to have are gone for good, not orphaned by
+ * accident. theme.css + user-style.css are this box's own styling. */
+
+@import "theme.css";
+@import "user-style.css";
