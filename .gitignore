@@ -1,0 +1,6 @@
+# ~/.config/sway is a symlink into sway/ in this repo (see setup.sh), so
+# per-machine overrides written to ~/.config/sway/local.conf.d/ (see
+# sway/config's tail comment -- VM display-resolution/DPMS tweaks, a
+# different keyboard layout, etc.) physically land inside this checkout.
+# Deliberately not tracked.
+sway/local.conf.d/
