@@ -296,6 +296,25 @@ real logged-in shell does — and the socket filename embeds sway's PID, so
 it isn't a fixed path; the script re-discovers it each time. Also routes
 around the VM's fish-vs-bash quoting gotcha below.)
 
+**Permanent fix, once per VM** (so you stop needing the wake script at
+all): add a `local.conf.d` drop-in — this directory is the exact mechanism
+`sway/config`'s own tail comment sets aside for per-machine overrides not
+tracked in git — that kills the shared `swayidle` and re-execs it without
+the `timeout 600 'output * dpms off'` clause:
+
+```
+# ~/.config/sway/local.conf.d/20-vm-no-dpms-idle.conf
+exec_always pkill -x swayidle; swayidle -w \
+    lock "swaylock -f -c 1b1e26" \
+    timeout 300 "swaylock -f -c 1b1e26" \
+    before-sleep "swaylock -f -c 1b1e26"
+```
+
+Then `swaymsg reload` (or just log out/in). The VM still locks on idle and
+before sleep — it just never blanks the output, since nothing's around to
+un-blank it. Copying the file over fish's heredoc limitation (see below):
+`scp` it from the host rather than trying to heredoc it over `ssh`.
+
 ## VM display is small by default (1280x800) and doesn't persist a change
 
 The virtual GPU's default mode is only 1280x800 — not enough for some
