@@ -7,13 +7,20 @@
 #
 # Idempotent: safe to re-run. Each step checks current state before writing.
 #
-# Background on *why* these steps exist is in the dotfiles history and in
-# Claude's memory (hibernate-swapfile-setup-the dev machine.md, wlogout-swaylock-wiring-fixed.md,
-# greetd-keyboard-layout-fix-pending.md) — summarized inline below so this
-# script is the single reference even without that context.
+# Background on *why* these steps exist is summarized inline in each step's
+# own comments, so this script is a self-contained reference on its own.
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
+
+# This script runs long enough (package builds especially) that the default
+# ~15min sudo timestamp can expire mid-run, re-prompting for your password
+# out of nowhere. Ask once up front, then keep it alive in the background
+# for the life of this script instead.
+sudo -v
+( while true; do sudo -n true; sleep 60; kill -0 "$$" 2>/dev/null || exit; done ) 2>/dev/null &
+SUDO_KEEPALIVE_PID=$!
+trap 'kill "$SUDO_KEEPALIVE_PID" 2>/dev/null' EXIT
 
 echo "==> Installing official packages from packages.txt"
 # jack2 conflicts with pipewire-jack (the correct provider of the jack API
