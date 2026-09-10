@@ -11,9 +11,13 @@ The full path from a blank machine to a working themed desktop, in order.
 Verified end-to-end on 2026-09-09 (see `VM-TESTING.md`).
 
 1. **Run the base CachyOS installer** as normal (disk partitioning,
-   username, etc). Pick whatever keyboard layout/variant you actually use
-   (e.g. Dvorak) when the installer asks — `bootstrap.sh` later reads this
-   back via `localectl` rather than assuming US QWERTY.
+   username, etc). When it asks which desktop environment to install,
+   choose **no desktop** — this repo installs and configures SwayFX
+   itself via `packages.txt`/`bootstrap.sh`; picking KDE/GNOME/etc. here
+   just installs a whole desktop stack this repo doesn't use and never
+   removes. Pick whatever keyboard layout/variant you actually use (e.g.
+   Dvorak) when the installer asks — `bootstrap.sh` later reads this back
+   via `localectl` rather than assuming US QWERTY.
 
    The installer's own keyboard step does **not** offer modifier options
    like `ctrl:swapcaps`. If you use one, set it *before* running
