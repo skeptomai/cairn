@@ -267,15 +267,21 @@ echo "==> Installing greetd config (keyboard layout matched to the session below
 sed "s#{{XKB_ENV}}#$XKB_ENV#" greetd/config.toml.tmpl | sudo tee /etc/greetd/config.toml >/dev/null
 sudo install -m 644 greetd/regreet.toml /etc/greetd/regreet.toml
 
-echo "==> Writing matching sway keyboard layout to ~/.config/sway/local.conf.d/ (not tracked in git -- see sway/config's tail)"
-mkdir -p "$HOME/.config/sway/local.conf.d"
+echo "==> Writing matching sway keyboard layout to sway/local.conf.d/ (not tracked in git -- see sway/config's tail)"
+# Written into the repo checkout itself (not $HOME/.config/sway/local.conf.d)
+# because on a genuinely fresh install this runs *before* setup.sh has
+# turned ~/.config/sway into a symlink to this checkout -- writing through
+# $HOME/.config would land in a plain real directory that setup.sh then
+# backs up and replaces, stranding this file. Writing here means it's
+# already in place once the symlink exists, regardless of run order.
+mkdir -p "sway/local.conf.d"
 {
   echo "input \"type:keyboard\" {"
   echo "    xkb_layout $XKB_LAYOUT"
   [ -n "$XKB_VARIANT" ] && echo "    xkb_variant $XKB_VARIANT"
   [ -n "$XKB_OPTIONS" ] && echo "    xkb_options $XKB_OPTIONS"
   echo "}"
-} > "$HOME/.config/sway/local.conf.d/10-keyboard.conf"
+} > "sway/local.conf.d/10-keyboard.conf"
 [ -f /etc/greetd/wallpaper.png ] || echo "    NOTE: /etc/greetd/wallpaper.png not present -- copy one manually (not tracked in git, it's a 24MB binary)"
 sudo systemctl enable greetd.service
 

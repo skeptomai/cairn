@@ -49,7 +49,16 @@ mkinitcpio, limine cmdline, root-owned `/etc/greetd/*`) live in
   hardcoded default — don't reintroduce a hardcoded layout in
   `sway/config`/`greetd/config.toml.tmpl`; that's what caused this bug once
   already, just with a different fixed value ("us" instead of a personal
-  Dvorak default).
+  Dvorak default). Also: `bootstrap.sh` writes the generated
+  `10-keyboard.conf` into `sway/local.conf.d/` (the repo checkout itself),
+  not `$HOME/.config/sway/local.conf.d/` — on `install.sh`'s actual run
+  order (bootstrap before setup), `~/.config/sway` is still a plain real
+  directory when this runs, and `setup.sh` later backs that whole directory
+  up and replaces it with a symlink to this checkout, stranding anything
+  written through the `$HOME/.config` path. Found on a genuine fresh-VM
+  install 2026-09-09 — never caught before because prior VM cycles kept
+  re-running `bootstrap.sh` on top of an already-`setup.sh`'d machine, where
+  the symlink already existed.
 - **`kdeglobals-file`** is named that way (not just `kdeglobals`) because it's
   a single file, not a directory, and the existing `link()` helper in
   `setup.sh` assumes directory-shaped sources elsewhere — check `setup.sh`
