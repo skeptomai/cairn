@@ -1,104 +1,94 @@
-# Plan: theme Emacs from Cairn's own theme system
+# Emacs theming from Cairn's own theme system — shipped
+
+Status: **implemented and verified** (2026-09-10). This doc now records what
+actually shipped; see git history in `cairn`, `cairn-emacs-themer`, and the
+private `dotfiles` repo for the detailed commits.
 
 Context: `~/Projects/omarchy-emacs-themer` themes Doom Emacs from *Omarchy's*
 theme system (see `docs/omarchy-theme-system.md`). Omarchy no longer runs on
 this machine — [[cachyos-replaced-omarchy-on-omen]] — so that integration's
-push side (the `theme-set.d` hook) has had nothing to trigger it for some
-time. This plan replaces it with the equivalent wired into `cairn`'s own
-`theming/apply-theme.py` pipeline instead.
+push side had nothing to trigger it. This replaced it with the equivalent
+wired into `cairn`'s own `theming/apply-theme.py` pipeline.
 
-**Good news going in**: Cairn's palette schema (`theming/palettes/*.toml`) is
-already close to what the existing Emacs face-mapping expects — flat
-`black`/`red`/`green`/`yellow`/`blue`/`magenta`/`cyan`/`white` plus
-`bright-*` variants, and a `mode` field for light/dark, no separate
-`light.mode` file needed. This is a more direct fit than Omarchy's *current*
-semantic-only schema is (see the research doc's schema-drift section) — the
-existing `20-emacs.sh` face list can be ported with light adaptation, not a
-rewrite.
+## What shipped
 
-## Decisions (confirmed 2026-09-10)
+- **[cairn-emacs-themer](https://github.com/skeptomai/cairn-emacs-themer)**
+  — a fresh repo seeded from `omarchy-emacs-themer`'s code (not a
+  GitHub-native fork; `omarchy-emacs-themer` itself is untouched). Purely
+  the elisp consumer side now: `cairn-themer-install-and-load`,
+  `cairn-themer-add-theme-directory`, `cairn-themer-sync-on-startup`. The
+  Omarchy `theme-set` hook (`20-emacs.sh`, `install.sh`'s hook-install
+  step) was dropped entirely, along with `tests/` and
+  `docs/dynamic-conversion-plan.md` (both for an abandoned, never-shipped
+  Omarchy-`neovim.lua`-parsing approach). `docs/PALETTE-DESIGN.md` was
+  kept — the mapping/contrast principles are unchanged, only the color
+  source moved.
+- **`autothemer` confirmed still live**: `jasonm23/autothemer`, not
+  archived, actively pushed, on MELPA — kept as the dependency.
+- **`cairn-themer-theme-directory`** now defaults to a
+  `doom-user-dir`-relative path (falling back to `user-emacs-directory`
+  for non-Doom installs), per the confirmed decision to use Doom's own
+  recommended convention.
+- **`cairn-themer-current-theme-file`** defaults to
+  `~/.local/share/cairn-repo/emacs/cairn-theme.el` — resolved through
+  cairn's existing stable repo-location pointer (the same convention
+  `sway/config` already uses for `screensaver`/`lockscreen` scripts).
+  **This required a matching change to the private `dotfiles` repo's
+  `cachyos/setup.sh`**, which didn't previously create that symlink at
+  all (only the public `cairn` repo's own `setup.sh` did) — this machine
+  runs `dotfiles/cachyos`, not a `cairn` clone, so the pointer now
+  resolves to that checkout instead.
+- **`theming/templates/emacs-theme.el.tmpl`** (in `cairn`, mirrored into
+  the private `dotfiles` repo) — the ported face list, rendered directly
+  from the palette dict `apply-theme.py` already has in hand. Two token
+  gaps vs. the original ANSI-16 schema, resolved: no dedicated cursor
+  color (uses `accent`) and no split selection foreground/background (uses
+  plain `fg` paired with the single `selection` color — checked against a
+  real palette where a dedicated pair would have resolved identically
+  anyway).
+- **`apply-theme.py`** gained `emacs_mode_tokens()` (mode-line/LSP-popup
+  colors, computed per-palette from tokens already present — mirrors the
+  existing `MODE_DEFAULTS` pattern for GTK/Kvantum, but computed rather
+  than static, since these need the theme's actual colors) and a `TARGETS`
+  entry writing `emacs/cairn-theme.el` and pushing it via `emacsclient`
+  (a no-op if Emacs isn't running, via the existing `reload()` helper's
+  graceful FileNotFoundError/timeout handling).
+- **Doom config** (private `dotfiles` repo): `packages.el`/`config.el`
+  swapped from `omarchy-themer` to `cairn-themer`. `server-start` was
+  already unconditional elsewhere (the `claude-code-ide` MCP integration),
+  so nothing new needed there.
 
-- **Keep `autothemer`** as the theme-definition engine, pending a quick
-  liveness check — reuse the existing DSL rather than rewriting the face
-  list against plain `deftheme`.
-- **`omarchy-emacs-themer` stays untouched.** No changes, no archiving.
-- **Theme directory**: `(expand-file-name "themes/" doom-user-dir)` —
-  Doom's own recommended convention — not the package's original
-  `user-emacs-directory` default.
-- **New repo**: `cairn-emacs-themer`, seeded from `omarchy-emacs-themer`'s
-  current code as a fresh history (same pattern as `cairn` itself being
-  genericized from the private `dotfiles` repo) — not a GitHub-native fork.
-  This repo becomes purely the *elisp* side (install/load a theme file,
-  sync on startup). The Omarchy-hook push side (`20-emacs.sh`, the
-  `~/.config/omarchy/hooks/` install step) is dropped entirely — the
-  *generation* of the theme file moves into `cairn`'s own
-  `theming/apply-theme.py`.
+## Verification performed
 
-## Phases
+- Rendered the template directly and loaded the output in a throwaway
+  batch Emacs with a freshly-fetched `autothemer` — confirmed the theme
+  registers (`custom-theme-p`), enables (`custom-enabled-themes`), and
+  produces correct face specs, for both a dark (`catppuccin-mocha`) and
+  light (`catppuccin-latte`) preset.
+- `doom sync` on the real machine — `cairn-themer` cloned, built, and
+  byte-compiled via `straight.el` with no errors.
+- Started a real, isolated Doom Emacs daemon (`--daemon=cairn-test`, so as
+  not to touch the actual daily-driver session) and confirmed via its
+  startup log and live `emacsclient` face-spec queries:
+  - **Pull (startup sync)**: found the theme file through the
+    `~/.local/share/cairn-repo` stable pointer and loaded it automatically
+    — no manual step.
+  - **Push (live update)**: `emacsclient -e '(cairn-themer-install-and-load ...)'`
+    updated the running session's actual face colors immediately, with no
+    restart.
+- Programmatically checked all 5 existing presets against
+  `PALETTE-DESIGN.md`'s "`selection` must be tonally distinct from both
+  `bg` and `fg`" rule (RGB Euclidean distance). **Found two real flags**:
+  `everforest` and `nord` both have `selection` quite close to `bg`
+  (distance ~41–44, vs. 100+ for the other three) — meaning selected/
+  region-highlighted text will show noticeably weaker contrast on those
+  two themes specifically. Not fixed as part of this work; a real,
+  actionable finding for whenever those two presets get attention, not an
+  assumption carried over from the plan.
 
-### Phase 0 — Sanity check
-- [ ] Confirm `autothemer` is still a live, installable package (not
-      abandoned/broken) before building on it.
+## Open items, not addressed here
 
-### Phase 1 — Seed `cairn-emacs-themer`
-- [ ] Create the `cairn-emacs-themer` GitHub repo.
-- [ ] Copy `omarchy-emacs-themer`'s current code in as a fresh initial
-      commit (no linked history), matching how `cairn` itself was created.
-
-### Phase 2 — Rebrand the elisp package
-- [ ] Rename `omarchy-themer-*` → `cairn-themer-*` throughout
-      (`cairn-themer.el`, package metadata, `README.md`).
-- [ ] Change the theme-directory default to the `doom-user-dir`-relative
-      path (decision above).
-- [ ] Point `cairn-themer-sync-on-startup` at wherever `cairn`'s pipeline
-      will write the live theme file (decided during Phase 4).
-
-### Phase 3 — Drop the Omarchy-hook push side
-- [ ] Remove `20-emacs.sh` and the `~/.config/omarchy/hooks/` install step
-      from `install.sh` (or repurpose `install.sh` for whatever, if
-      anything, `cairn-emacs-themer` still needs installed standalone).
-- [ ] Update `README.md`/`CLAUDE.md` to describe the new cairn-driven push
-      mechanism instead of the Omarchy hook one.
-
-### Phase 4 — Build the generation side in `cairn`
-- [ ] New `theming/templates/emacs-theme.el.tmpl`, porting `20-emacs.sh`'s
-      face list (core faces, line numbers, search/match, syntax
-      highlighting, mode-line, errors, diff, parens, LSP faces incl. the
-      `lsp-ui-doc-frame-hook` trick, flycheck/flymake underlines) to
-      Cairn's `{{token}}` syntax.
-- [ ] Add light/dark mode-line & LSP-popup variant tokens to
-      `apply-theme.py` (an `EMACS_MODE_DEFAULTS`-style dict alongside the
-      existing `MODE_DEFAULTS`, keyed by `tokens["mode"]`) — Cairn has no
-      `sel-fg`/`sel-bg` split (just one `selection`), decide there whether
-      to reuse `selection` for both roles or bring in `hover-fg`/`hover-bg`
-      as the counterpart.
-- [ ] Add a `TARGETS` entry: render the template, write it to the Phase-2
-      output path, reload via `emacsclient -e '(cairn-themer-install-and-load "...")'`
-      guarded the same way this pipeline already guards other
-      maybe-not-running apps.
-
-### Phase 5 — Wire up Doom config
-- [ ] In the *private* `dotfiles` repo's `doomemacs/doom/config.el`
-      (personal editor config, out of `cairn`'s own scope): add
-      `cairn-emacs-themer` to `packages.el`, add the `use-package!` block
-      (`cairn-themer-add-theme-directory` + `cairn-themer-sync-on-startup`),
-      confirm `(server-start)` is present.
-- [ ] `doom sync`.
-
-### Phase 6 — Validate
-- [ ] Apply a theme via `theming/pick-theme.sh` with Emacs server running —
-      confirm the live session updates with no manual reload.
-- [ ] Restart Emacs with a theme already applied — confirm
-      `cairn-themer-sync-on-startup` loads the current one, not stale
-      colors.
-- [ ] Spot-check all 5 existing presets (`gray-blue`, `gruvbox`, `nord`,
-      `catppuccin-mocha`, `everforest`) against `PALETTE-DESIGN.md`'s
-      contrast criteria — Cairn's palettes weren't designed against these
-      constraints originally, so this is new information, not an
-      assumption to carry over.
-
-### Phase 7 — Close out
-- [ ] Update this doc to reflect what actually shipped (vs. what was
-      planned) for anything that changed during implementation.
-- [ ] Commit and push `cairn-emacs-themer`, `cairn`, and the private
-      `dotfiles` config change.
+- The `everforest`/`nord` `selection` contrast finding above.
+- The real daily-driver Emacs session hasn't yet been restarted to pick up
+  `cairn-themer` for actual use — validated via an isolated test daemon
+  instead, deliberately, so as not to disrupt an active session mid-work.
