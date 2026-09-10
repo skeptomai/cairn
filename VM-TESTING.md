@@ -54,17 +54,21 @@ sudo ufw reload
 (Swap `wlan0` for whatever `ip route show default` reports as the uplink
 interface if this is ever run on different hardware/network.)
 
-## Install media: use the real USB, don't download an ISO
+## Install media: a downloaded ISO works fine too
 
-If a CachyOS installer USB is already in hand, pass the raw block device
-straight to the VM as a CD-ROM instead of downloading an ISO — hybrid ISOs
-written with `dd` boot fine this way under UEFI:
+Either works — pick whichever's easier to reach at the time.
+
+**Local ISO file** (simplest — no USB device-availability juggling across
+reboots): attach it as a file-backed CD-ROM. It must live somewhere
+`libvirt-qemu` can actually read — a home directory with restrictive (e.g.
+`700`) permissions blocks it with a `Permission denied` on boot even though
+the file itself is readable by the owner, so copy it into libvirt's own
+images directory first rather than fighting home-dir ACLs:
 
 ```bash
-lsblk -f    # confirm the USB device, e.g. /dev/sda, iso9660, label COS_2026xx
-```
+sudo cp ~/Downloads/cachyos-desktop-linux-*.iso /var/lib/libvirt/images/
+sudo chown root:libvirt /var/lib/libvirt/images/cachyos-desktop-linux-*.iso
 
-```bash
 sudo qemu-img create -f qcow2 /var/lib/libvirt/images/cachyos-test.qcow2 40G
 
 sudo virt-install \
@@ -74,7 +78,7 @@ sudo virt-install \
   --vcpus 4 \
   --cpu host-passthrough \
   --disk path=/var/lib/libvirt/images/cachyos-test.qcow2,bus=virtio,format=qcow2 \
-  --disk path=/dev/sda,device=cdrom,bus=sata,readonly=on \
+  --disk path=/var/lib/libvirt/images/cachyos-desktop-linux-*.iso,device=cdrom,bus=sata,readonly=on \
   --boot uefi \
   --os-variant archlinux \
   --network network=default,model=virtio \
@@ -82,6 +86,38 @@ sudo virt-install \
   --video virtio \
   --noautoconsole
 ```
+
+Once the installer finishes and the VM reboots, eject the CD-ROM so it
+doesn't boot back into the installer instead of the newly installed
+system:
+
+```bash
+sudo virsh change-media cachyos-test sda --eject --config --live
+```
+
+**Real installer USB**, if already in hand: pass the raw block device
+straight through instead of the ISO file — hybrid ISOs written with `dd`
+boot fine this way under UEFI. Same `virt-install` command, just
+`--disk path=/dev/sda,device=cdrom,bus=sata,readonly=on` (confirm the real
+device first with `lsblk -f` — look for `iso9660`, label `COS_2026xx`).
+Downside versus the file-backed approach: the device has to still be
+physically present and enumerated as the same path across every VM
+rebuild, which a plain ISO file doesn't require.
+
+### Rebuilding the VM from scratch (wiping a previous test)
+
+```bash
+sudo virsh destroy cachyos-test          # if running
+sudo virsh undefine cachyos-test --nvram # --nvram required: fails without it if UEFI/secure boot is in use
+sudo rm -f /var/lib/libvirt/images/cachyos-test.qcow2
+```
+
+Then repeat the `qemu-img create` + `virt-install` steps above. Consider
+taking a snapshot (`sudo virsh snapshot-create-as cachyos-test post-install
+"fresh OS install, before install.sh"`) right after the base OS install
+finishes and before running `install.sh` — reverting to that snapshot is
+instant, versus the ~20-30 minutes a full OS reinstall costs every time
+`install.sh` itself needs a genuinely from-scratch test.
 
 ## Viewing/interacting with the VM
 
@@ -122,6 +158,9 @@ sudo virsh domdisplay cachyos-test     # spice:// URL if virt-viewer isn't handy
   and walker come up.
 - Anything the scripts assume about `packages.txt` being complete gets
   caught here rather than mid-reinstall on real hardware.
+
+**All confirmed** via `install.sh`'s first genuine start-to-finish run on a
+truly fresh install, 2026-09-09 — see the dated section below.
 
 ## Lessons from the first real end-to-end run (2026-09-06/07)
 
@@ -207,6 +246,42 @@ personal-app packages "count" risks encoding stale/wrong assumptions. If a
 real reinstall needs these reproduced exactly, regenerate against
 `pacman -Qqen`/`pacman -Qqem` again and review by hand rather than trusting
 this doc's list is exhaustive.
+
+## install.sh's first genuine end-to-end run (2026-09-09)
+
+Every prior VM cycle had tested `bootstrap.sh`/`setup.sh` directly, but
+never `install.sh` itself (added 2026-09-09) on a machine where it runs in
+its *actual* intended order — clone repo, then `install.sh`, nothing
+pre-provisioned. That exposed one real bug immediately, plus one gap that
+isn't a bug but is worth documenting:
+
+- **Real bug**: `bootstrap.sh`'s keyboard-detection step wrote the
+  generated `10-keyboard.conf` to `$HOME/.config/sway/local.conf.d/`,
+  assuming that path was already the symlink `setup.sh` creates into this
+  checkout. On `install.sh`'s actual order (`bootstrap.sh` runs *before*
+  `setup.sh`), `~/.config/sway` is still a plain real directory at that
+  point — `setup.sh` then backs the whole thing up (into
+  `~/.config-backup-<timestamp>/`) and replaces it with the symlink,
+  stranding the keyboard override in the backup and leaving the real
+  session on `sway/config`'s tracked `us`-only fallback. Never caught
+  before because every earlier VM cycle re-ran `bootstrap.sh` on top of an
+  already-`setup.sh`'d machine, where the symlink already existed. Fixed
+  in `ac4d36a` by writing to `sway/local.conf.d/` relative to the repo
+  checkout instead of guessing through `$HOME/.config`.
+- **Installer gap, not a script bug**: the base CachyOS installer's
+  keyboard step only offers layout/variant (e.g. Dvorak), not modifier
+  options like `ctrl:swapcaps`. A fresh install that wants that option has
+  to set it manually (`sudo localectl set-x11-keymap us pc105 dvorak
+  ctrl:swapcaps`) and re-run `bootstrap.sh` before it'll show up anywhere —
+  `bootstrap.sh` correctly mirrors whatever `localectl` reports, it just
+  can't invent an option you never set. Documented in the README's
+  "Customizing the keyboard layout" section.
+
+With both addressed, `install.sh` completed a full, unattended-except-for-
+the-gum-prompts run: fresh install → clone → `install.sh` (bootstrap →
+setup → theme pick → reboot) → clean login at the greeter with the correct
+layout → working Sway/waybar/walker/elephant session. First time this
+exact path has been verified rather than assumed.
 
 ## Remote access to the VM (no more shutdown/guestfish for routine syncs)
 

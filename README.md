@@ -7,23 +7,72 @@ this repo.
 
 ## Installing on a fresh CachyOS system
 
+The full path from a blank machine to a working themed desktop, in order.
+Verified end-to-end on a genuine fresh VM install on 2026-09-09 (see
+`VM-TESTING.md`) — this is the real sequence, not an aspirational one.
+
+1. **Run the base CachyOS installer** as normal (disk partitioning,
+   username, etc). Pick whatever keyboard layout/variant you actually use
+   (e.g. Dvorak) when the installer asks — `bootstrap.sh` later reads this
+   back via `localectl` rather than assuming US QWERTY.
+
+   The installer's own keyboard step does **not** offer modifier options
+   like `ctrl:swapcaps`. If you use one, set it *before* running
+   `bootstrap.sh` (see "Customizing the keyboard layout" below) — otherwise
+   `bootstrap.sh` will faithfully carry forward "no option set" and your
+   session ends up without it.
+
+2. **Get this repo onto the machine and run the installer:**
+
+   ```bash
+   sudo pacman -S --needed git
+   git clone https://github.com/skeptomai/cairn.git ~/cairn
+   cd ~/cairn
+   ./install.sh
+   ```
+
+   `install.sh` is gum-driven and narrates each step, confirming before it
+   does anything: it self-installs `gum` if missing (chicken-and-egg on a
+   truly fresh system), then walks through `bootstrap.sh` (packages,
+   hibernation swapfile, mkinitcpio/limine, greetd, UWSM session, Tailscale
+   enable, keyboard layout), `setup.sh` (symlinks every tracked config into
+   `~/.config`), and a theme picker, and finally offers to reboot for you.
+
+   Prefer to run the pieces yourself instead:
+
+   ```bash
+   ./bootstrap.sh
+   ./setup.sh
+   python3 theming/apply-theme.py gray-blue   # or theming/pick-theme.sh for the interactive picker
+   ```
+
+3. **Reboot** (or accept `install.sh`'s own reboot prompt) — the new
+   initramfs (`resume` hook) and boot cmdline (`resume=`/`resume_offset=`)
+   only take effect on the next boot, and `greetd` needs to actually start
+   to hand you the new `sway-uwsm` session.
+
+4. **Log in at the greeter.** Its keyboard layout was rendered by
+   `bootstrap.sh` from the same `localectl` snapshot as your real session,
+   so they should already agree — if a correctly-typed password looks like
+   a failed login, see the Troubleshooting section below.
+
+That's it — you land in a fully symlinked, themed SwayFX session with
+waybar, walker, swaync, and everything else in this repo already wired up.
+
+### Customizing the keyboard layout
+
+`bootstrap.sh` doesn't hardcode a layout — it reads whatever `localectl`
+already reports and threads it through to both the greeter and the real
+session. To set something the base installer's keyboard picker doesn't
+expose (like swapping Ctrl and Caps Lock):
+
 ```bash
-sudo pacman -S --needed git
-git clone https://github.com/<you>/cairn.git ~/cairn
-cd ~/cairn
-./install.sh     # gum-driven: bootstrap.sh + setup.sh + a theme picker, narrated
+sudo localectl set-x11-keymap us pc105 dvorak ctrl:swapcaps   # example: Dvorak + swapped Ctrl/Caps
+cd ~/cairn && ./bootstrap.sh    # re-run to regenerate the greeter + sway keyboard config from the new setting
 ```
 
-Or run the pieces yourself:
-
-```bash
-./bootstrap.sh   # one-time: packages, hibernation swapfile, mkinitcpio/limine, greetd, UWSM session, Tailscale enable
-./setup.sh       # idempotent: symlink dotfiles into ~/.config
-python3 theming/apply-theme.py gray-blue   # pick a theme — see theming/README.md
-```
-
-Reboot after `bootstrap.sh` — the new initramfs (`resume` hook) and boot
-cmdline (`resume=`/`resume_offset=`) only take effect on the next boot.
+Re-running `bootstrap.sh` is safe (idempotent) and only the keyboard step's
+output will actually change if that's all you altered.
 
 ## Theming
 
@@ -120,9 +169,6 @@ here — both work fine on their packaged defaults on this machine.
 
 - `/etc/greetd/wallpaper.png` — a 24MB binary, not worth committing. Copy one
   manually after a fresh install; `bootstrap.sh` will warn if it's missing.
-- Hardware-specific UUIDs (`ROOT_UUID` in `bootstrap.sh`) are specific to
-  *this* machine's btrfs filesystem — on a different machine, get the real
-  UUID with `blkid` / `lsblk -f` and update the script before running it.
 
 ## Troubleshooting
 
@@ -153,11 +199,12 @@ journalctl -b <next-boot-idx> | grep -i resume  # should show "PM: Image signatu
 ### Login at the greeter fails even with the right password
 
 Check `/etc/greetd/config.toml`'s `XKB_DEFAULT_*` env vars actually match
-`~/.config/sway/local.conf.d/10-keyboard.conf` — a mismatch here means what
-you type at the greeter isn't what you think it is. Re-running
-`bootstrap.sh` regenerates both from `localectl status`; if that's still
-wrong, fix it with `localectl set-x11-keymap <layout> [variant] [options]`
-and re-run.
+`sway/local.conf.d/10-keyboard.conf` (in this repo checkout — that's where
+`~/.config/sway/local.conf.d/10-keyboard.conf` resolves to once `setup.sh`
+has symlinked `~/.config/sway`) — a mismatch here means what you type at
+the greeter isn't what you think it is. Re-running `bootstrap.sh`
+regenerates both from `localectl status`; if that's still wrong, fix it
+with `localectl set-x11-keymap <layout> [variant] [options]` and re-run.
 
 ### Waybar/walker/swaync not appearing or misconfigured
 
