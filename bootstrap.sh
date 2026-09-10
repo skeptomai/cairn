@@ -88,6 +88,10 @@ AUR_PACKAGES=(
   # other Tela-circle color variant. The "-all" variant installs every
   # color (grey/dracula/pink/purple/black/etc.) in one go.
   tela-circle-icon-theme-all-git
+  # hypa-ttfx-bin: provides the `ttfx` binary screensaver/run-screensaver.sh
+  # calls to animate screensaver/cairn.txt -- the same tool (same CLI flags)
+  # Omarchy's own screensaver uses under the hood.
+  hypa-ttfx-bin
 )
 
 if ! command -v yay &>/dev/null; then

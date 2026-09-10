@@ -88,6 +88,20 @@ TOML per preset (`gray-blue`, `gruvbox`, `nord`, `catppuccin-mocha`,
 kdeglobals by `theming/apply-theme.py`. See `theming/README.md` for the
 palette schema and how to add a new preset or app.
 
+## Screensaver
+
+`screensaver/` animates `screensaver/cairn.txt` (an ASCII "CAIRN" banner)
+with a random [`ttfx`](https://github.com/Hypabolic/Hypa-TTFX) effect,
+fullscreen, one instance per connected output — modeled on
+[Omarchy](https://github.com/basecamp/omarchy)'s own screensaver, adapted
+from Hyprland/`hyprctl` to Sway/`swaymsg`. Wired into `sway/config`'s
+`swayidle` chain: it comes up after 150s idle, the actual lock screen takes
+over at 300s (killing the screensaver first if it's still up), and any
+input exits it immediately. Requires the `hypa-ttfx-bin` AUR package
+(installed by `bootstrap.sh`), which provides `ttfx`.
+
+Run it manually any time with `screensaver/launch-screensaver.sh`.
+
 ### What `bootstrap.sh` does, in order
 
 1. Installs everything in `packages.txt` via `pacman`, plus the AUR
@@ -150,6 +164,7 @@ cairn/
 ├── setup.sh                    # idempotent dotfile symlinking
 ├── install.sh                   # gum-driven wrapper: bootstrap -> setup -> theme
 ├── theming/                     # cross-app theme switcher (palettes/, templates/, apply-theme.py)
+├── screensaver/                 # ttfx-animated ASCII screensaver, launched by sway/config's swayidle
 ├── sway/config                 # SwayFX compositor config
 ├── waybar/                     # status bar (config-sway.jsonc, style.css, theme.css)
 ├── walker/                     # app launcher
