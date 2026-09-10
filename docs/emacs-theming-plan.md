@@ -5,7 +5,7 @@ theme system (see `docs/omarchy-theme-system.md`). Omarchy no longer runs on
 this machine — [[cachyos-replaced-omarchy-on-omen]] — so that integration's
 push side (the `theme-set.d` hook) has had nothing to trigger it for some
 time. This plan replaces it with the equivalent wired into `cairn`'s own
-`theming/apply-theme.py` pipeline instead of Omarchy's.
+`theming/apply-theme.py` pipeline instead.
 
 **Good news going in**: Cairn's palette schema (`theming/palettes/*.toml`) is
 already close to what the existing Emacs face-mapping expects — flat
@@ -16,101 +16,89 @@ semantic-only schema is (see the research doc's schema-drift section) — the
 existing `20-emacs.sh` face list can be ported with light adaptation, not a
 rewrite.
 
-## Design
+## Decisions (confirmed 2026-09-10)
 
-Mirror Cairn's existing pattern (`theming/templates/*.tmpl` rendered by
-`apply-theme.py`, one `TARGETS` entry per app) instead of Omarchy's
-hook-and-shell-variable approach — no `awk` parsing, no schema-fallback
-dance, because `apply-theme.py` already has the full palette as a Python
-dict before it ever touches a template.
+- **Keep `autothemer`** as the theme-definition engine, pending a quick
+  liveness check — reuse the existing DSL rather than rewriting the face
+  list against plain `deftheme`.
+- **`omarchy-emacs-themer` stays untouched.** No changes, no archiving.
+- **Theme directory**: `(expand-file-name "themes/" doom-user-dir)` —
+  Doom's own recommended convention — not the package's original
+  `user-emacs-directory` default.
+- **New repo**: `cairn-emacs-themer`, seeded from `omarchy-emacs-themer`'s
+  current code as a fresh history (same pattern as `cairn` itself being
+  genericized from the private `dotfiles` repo) — not a GitHub-native fork.
+  This repo becomes purely the *elisp* side (install/load a theme file,
+  sync on startup). The Omarchy-hook push side (`20-emacs.sh`, the
+  `~/.config/omarchy/hooks/` install step) is dropped entirely — the
+  *generation* of the theme file moves into `cairn`'s own
+  `theming/apply-theme.py`.
 
-1. **New template**: `theming/templates/emacs-theme.el.tmpl`, an
-   `autothemer-deftheme` block using Cairn's `{{token}}` syntax directly
-   (`{{bg}}`, `{{fg}}`, `{{red}}`, `{{bright-cyan}}`, etc.) — port the face
-   list from `20-emacs.sh` (core faces, line numbers, search/match, syntax
-   highlighting, mode-line, errors, diff, parens, LSP faces incl. the
-   `lsp-ui-doc-frame-hook` trick, flycheck/flymake underlines) essentially
-   as-is; it's a solid, already-tuned list.
+## Phases
 
-2. **Light/dark mode-line and LSP-popup variants**: `20-emacs.sh` branches
-   on a `light.mode` file to pick different mode-line/LSP-popup colors (see
-   `PALETTE-DESIGN.md`'s table in the themer repo). Cairn's `apply-theme.py`
-   already does exactly this kind of mode-keyed branching for GTK/Kvantum
-   (`MODE_DEFAULTS` dict) — add an `EMACS_MODE_DEFAULTS`-style dict there,
-   computing `ml-active-bg`, `ml-active-fg`, `ml-inactive-bg`,
-   `ml-inactive-fg`, `ml-emphasis-fg`, `lsp-doc-bg`, `lsp-doc-fg`,
-   `lsp-doc-header-bg`, `lsp-doc-header-fg` from Cairn's `bg`/`fg`/
-   `selection`/`black`/`bright-black`/`blue` tokens, keyed by
-   `tokens["mode"]`, merged into the token dict the same way
-   `MODE_DEFAULTS[mode]` already is. Cairn has no `sel-fg`/`sel-bg` split
-   (just one `selection`) — use `selection` for both roles, or add
-   `hover-fg`/`hover-bg` (already in the palette schema) as the fg
-   counterpart if plain `selection`-on-`selection` reads flat.
+### Phase 0 — Sanity check
+- [ ] Confirm `autothemer` is still a live, installable package (not
+      abandoned/broken) before building on it.
 
-3. **Output path + `TARGETS` entry**: write to a fixed path, e.g.
-   `~/.emacs.d/themes/cairn-theme.el` (or wherever
-   `cairn-themer-theme-directory` defaults to — see below), overwritten on
-   every switch, no per-preset history needed (unlike alacritty's
-   per-preset files) since only "whatever's current" matters to a running
-   Emacs. Reload step: if `emacsclient` exists and a server is running,
-   call `(cairn-themer-install-and-load "<path>")` — a no-op cleanly if
-   Emacs isn't running, matching this pipeline's existing `reload()` helper
-   pattern (already swallows `FileNotFoundError`/timeouts for exactly this
-   "app might not be running" case).
+### Phase 1 — Seed `cairn-emacs-themer`
+- [ ] Create the `cairn-emacs-themer` GitHub repo.
+- [ ] Copy `omarchy-emacs-themer`'s current code in as a fresh initial
+      commit (no linked history), matching how `cairn` itself was created.
 
-4. **Elisp side — fork, don't depend on, `omarchy-themer.el`**: its two
-   generic functions (`*-install-and-load`, `*-add-theme-directory`) don't
-   know or care that a theme file came from Omarchy — port them into cairn
-   as `cairn-themer.el` (rename the `omarchy-*` prefix to `cairn-*` to avoid
-   implying an Omarchy dependency that no longer exists), keep the
-   `autothemer` dependency and the `lsp-ui-doc-frame-hook` integration
-   as-is. Add `cairn-themer-sync-on-startup`, pointed at the fixed path from
-   step 3 instead of Omarchy's `~/.local/state/omarchy/...` path.
+### Phase 2 — Rebrand the elisp package
+- [ ] Rename `omarchy-themer-*` → `cairn-themer-*` throughout
+      (`cairn-themer.el`, package metadata, `README.md`).
+- [ ] Change the theme-directory default to the `doom-user-dir`-relative
+      path (decision above).
+- [ ] Point `cairn-themer-sync-on-startup` at wherever `cairn`'s pipeline
+      will write the live theme file (decided during Phase 4).
 
-5. **Doom config wiring** (in the *private* `dotfiles` repo's
-   `doomemacs/doom/config.el` — personal editor config, out of `cairn`'s
-   own scope same as other personal-app choices):
-   ```elisp
-   (use-package! cairn-themer
-     :config
-     (cairn-themer-add-theme-directory)
-     (cairn-themer-sync-on-startup))
-   ```
-   plus `(server-start)` if not already present — required for the push
-   side to reach a running session at all.
+### Phase 3 — Drop the Omarchy-hook push side
+- [ ] Remove `20-emacs.sh` and the `~/.config/omarchy/hooks/` install step
+      from `install.sh` (or repurpose `install.sh` for whatever, if
+      anything, `cairn-emacs-themer` still needs installed standalone).
+- [ ] Update `README.md`/`CLAUDE.md` to describe the new cairn-driven push
+      mechanism instead of the Omarchy hook one.
 
-## Validation
+### Phase 4 — Build the generation side in `cairn`
+- [ ] New `theming/templates/emacs-theme.el.tmpl`, porting `20-emacs.sh`'s
+      face list (core faces, line numbers, search/match, syntax
+      highlighting, mode-line, errors, diff, parens, LSP faces incl. the
+      `lsp-ui-doc-frame-hook` trick, flycheck/flymake underlines) to
+      Cairn's `{{token}}` syntax.
+- [ ] Add light/dark mode-line & LSP-popup variant tokens to
+      `apply-theme.py` (an `EMACS_MODE_DEFAULTS`-style dict alongside the
+      existing `MODE_DEFAULTS`, keyed by `tokens["mode"]`) — Cairn has no
+      `sel-fg`/`sel-bg` split (just one `selection`), decide there whether
+      to reuse `selection` for both roles or bring in `hover-fg`/`hover-bg`
+      as the counterpart.
+- [ ] Add a `TARGETS` entry: render the template, write it to the Phase-2
+      output path, reload via `emacsclient -e '(cairn-themer-install-and-load "...")'`
+      guarded the same way this pipeline already guards other
+      maybe-not-running apps.
 
-- Run `theming/pick-theme.sh` (or `apply-theme.py <preset>` directly) with
-  Emacs server running, confirm the running session updates live with no
-  manual reload.
-- Restart Emacs with a different preset already applied, confirm
-  `cairn-themer-sync-on-startup` picks up the current one rather than
-  showing stale colors.
-- Spot-check each of Cairn's 5 existing presets (`gray-blue`, `gruvbox`,
-  `nord`, `catppuccin-mocha`, `everforest`) against `PALETTE-DESIGN.md`'s
-  contrast criteria (`selection` distinct from both `bg` and `fg`; ANSI
-  colors spanning multiple hue families) before trusting all five will
-  render well through this mapping — Cairn's palettes weren't designed
-  against these specific constraints, so this is new information, not an
-  assumption to carry over.
+### Phase 5 — Wire up Doom config
+- [ ] In the *private* `dotfiles` repo's `doomemacs/doom/config.el`
+      (personal editor config, out of `cairn`'s own scope): add
+      `cairn-emacs-themer` to `packages.el`, add the `use-package!` block
+      (`cairn-themer-add-theme-directory` + `cairn-themer-sync-on-startup`),
+      confirm `(server-start)` is present.
+- [ ] `doom sync`.
 
-## Open questions for you
+### Phase 6 — Validate
+- [ ] Apply a theme via `theming/pick-theme.sh` with Emacs server running —
+      confirm the live session updates with no manual reload.
+- [ ] Restart Emacs with a theme already applied — confirm
+      `cairn-themer-sync-on-startup` loads the current one, not stale
+      colors.
+- [ ] Spot-check all 5 existing presets (`gray-blue`, `gruvbox`, `nord`,
+      `catppuccin-mocha`, `everforest`) against `PALETTE-DESIGN.md`'s
+      contrast criteria — Cairn's palettes weren't designed against these
+      constraints originally, so this is new information, not an
+      assumption to carry over.
 
-- **Keep `autothemer` as a dependency, or drop it for a plain
-  `deftheme`/`custom-theme-set-faces`?** Keeping it is lower-risk (proven,
-  same structure you already trust) but is one more package Doom has to
-  manage. Dropping it removes a dependency at the cost of rewriting the
-  palette-binding boilerplate `autothemer-deftheme` currently handles.
-- **Archive `omarchy-emacs-themer`, or keep it around for other
-  machines/future Omarchy use?** Its push side has nothing to trigger it on
-  this machine anymore. If it's not used elsewhere, worth deciding whether
-  this cairn integration fully replaces it or the two coexist.
-- **`~/.emacs.d/themes/` as the output path** — confirm that's still
-  where Doom expects `custom-theme-load-path` entries on this setup, or if
-  it should be `doom-user-dir`-relative instead (the themer's own default
-  is `(expand-file-name "themes/" doom-user-dir)`, not
-  `user-emacs-directory`, in Doom's config.el usage — the package's
-  built-in default customization differs slightly from Doom's own
-  recommended override; worth picking one deliberately rather than
-  inheriting whichever one happens to run first).
+### Phase 7 — Close out
+- [ ] Update this doc to reflect what actually shipped (vs. what was
+      planned) for anything that changed during implementation.
+- [ ] Commit and push `cairn-emacs-themer`, `cairn`, and the private
+      `dotfiles` config change.
