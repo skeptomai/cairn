@@ -125,6 +125,51 @@ permitting. It also installs `lockscreen/rustlock.pam` to
 `/etc/pam.d/rustlock` — required, or PAM falls back to `pam_deny` and
 rejects every password, including a correct one.
 
+## Emacs theming
+
+Doom Emacs stays in sync with whatever theme is currently applied via
+[`cairn-emacs-themer`](https://github.com/skeptomai/cairn-emacs-themer) —
+a small elisp package (built on
+[`autothemer`](https://github.com/jasonm23/autothemer)) that installs and
+loads a generated theme file, both on Emacs startup and live while it's
+already running.
+
+The generation itself lives entirely in this repo, not in
+`cairn-emacs-themer`: `theming/templates/emacs-theme.el.tmpl` is rendered
+by `apply-theme.py` on every `theming/pick-theme.sh` switch, straight from
+the palette dict already in hand — no shell/`awk` color extraction needed.
+The rendered file is written to `emacs/cairn-theme.el` (tracked here, same
+as every other app's generated theme output) and pushed to a running Emacs
+via `emacsclient` — a no-op if Emacs isn't open.
+
+On the Emacs side, add the package and point it at this repo's stable
+location:
+
+```elisp
+;; packages.el
+(package! cairn-themer
+  :recipe (:host github :repo "skeptomai/cairn-emacs-themer" :files ("*.el")))
+
+;; config.el
+(use-package! cairn-themer
+  :config
+  (cairn-themer-add-theme-directory)
+  (cairn-themer-sync-on-startup))
+```
+
+`cairn-themer-sync-on-startup` finds the current theme via
+`~/.local/share/cairn-repo` — the same stable pointer `sway/config` already
+uses for `screensaver`/`lockscreen` scripts, maintained by `setup.sh`
+regardless of where this repo actually got cloned — so a fresh Emacs never
+shows stale colors from a previous session. You do need `(server-start)`
+running for the live-update side to have anything to push to.
+
+See `cairn-emacs-themer`'s own `docs/PALETTE-DESIGN.md` for what makes a
+palette render well through this face mapping (`selection` needs to be
+tonally distinct from both `bg` and `fg` — `everforest` and `nord` among
+this repo's presets currently fall short of that, a known gap, not yet
+fixed).
+
 ### What `bootstrap.sh` does, in order
 
 1. Installs everything in `packages.txt` via `pacman`, plus the AUR
@@ -189,6 +234,7 @@ cairn/
 ├── theming/                     # cross-app theme switcher (palettes/, templates/, apply-theme.py)
 ├── screensaver/                 # ttfx-animated ASCII screensaver, launched by sway/config's swayidle
 ├── lockscreen/                   # rustlock config + build patch (see bootstrap.sh)
+├── emacs/                        # generated cairn-theme.el, loaded via cairn-emacs-themer
 ├── sway/config                 # SwayFX compositor config
 ├── waybar/                     # status bar (config-sway.jsonc, style.css, theme.css)
 ├── walker/                     # app launcher
