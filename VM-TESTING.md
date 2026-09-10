@@ -145,6 +145,15 @@ sudo virsh domdisplay cachyos-test     # spice:// URL if virt-viewer isn't handy
   the wrong path and just printed manual instructions) — fixed in the commit
   that fixed the `@swap` block; see git log. It never fired on the real
   machine because `@swap` already existed there by hand.
+- rustlock's PAM service file (`lockscreen/rustlock.pam` ->
+  `/etc/pam.d/rustlock`) got skipped once on the real machine because the
+  binary was rebuilt by hand outside `bootstrap.sh`'s rustlock block, which
+  normally installs both together. Without it, rustlock rejects every
+  password (PAM falls back to `/etc/pam.d/other`'s `pam_deny`). If you're
+  verifying rustlock on a VM, confirm `/etc/pam.d/rustlock` exists after
+  `bootstrap.sh` and that `$mod+l` actually unlocks with the real password
+  — a full `bootstrap.sh` run installs both steps together, so this
+  specific failure shouldn't reproduce there, but it's cheap to check.
 
 ## What this VM run should confirm before trusting a real reinstall
 

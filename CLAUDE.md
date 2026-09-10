@@ -65,6 +65,20 @@ mkinitcpio, limine cmdline, root-owned `/etc/greetd/*`) live in
   before assuming a naming inconsistency is a mistake.
 - **`swayosd` and `yazi`** are packages with no tracked config — that's
   correct, not missing. They run on packaged defaults here.
+- **rustlock requires `/etc/pam.d/rustlock`** (`lockscreen/rustlock.pam`,
+  installed by `bootstrap.sh`) — without it, PAM falls back to
+  `/etc/pam.d/other` (`auth required pam_deny.so`), so rustlock rejects
+  every password, including a correct one, with no error beyond a generic
+  auth failure. Can only happen by rebuilding/installing the binary by hand
+  outside `bootstrap.sh`'s rustlock block, which always installs both
+  together — a full `bootstrap.sh` run can't reproduce it. Found the hard
+  way 2026-09-09, and made worse by `pam_faillock`: enough failed attempts
+  against the missing-PAM-config rustlock (or any lock screen) temporarily
+  locks the account itself, so even a *subsequent, correct* password on a
+  live, otherwise-working lock screen (swaylock included) then fails too,
+  until `sudo faillock --user <you> --reset` clears it. Confirmed fixed via
+  a live `$mod+l` test the same day: rustlock started, accepted the real
+  password, exited cleanly.
 
 ## Metadata
 
