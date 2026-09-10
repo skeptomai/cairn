@@ -55,6 +55,9 @@ exec_always pkill -x swayidle; swayidle -w \
         resume 'swaymsg "output * dpms on"' \
     before-sleep 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
 bindsym $mod+l exec 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
+# On-demand screensaver trigger (no swayidle timeout, just the same launch
+# script the 150s idle stage calls) -- for previewing it without waiting.
+bindsym $mod+Shift+l exec $HOME/.local/share/cairn-repo/screensaver/launch-screensaver.sh
 # Lock immediately on lid close, not just before-sleep -- suspend can lag
 # behind the physical lid switch (inhibitors, systemd-logind delay), during
 # which the screen would otherwise stay unlocked. No --locked flag: sway
