@@ -8,8 +8,7 @@ this repo.
 ## Installing on a fresh CachyOS system
 
 The full path from a blank machine to a working themed desktop, in order.
-Verified end-to-end on a genuine fresh VM install on 2026-09-09 (see
-`VM-TESTING.md`) — this is the real sequence, not an aspirational one.
+Verified end-to-end on 2026-09-09 (see `VM-TESTING.md`).
 
 1. **Run the base CachyOS installer** as normal (disk partitioning,
    username, etc). Pick whatever keyboard layout/variant you actually use
