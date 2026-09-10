@@ -32,21 +32,35 @@ input "type:touchpad" {
 # timeout/resume command through its own fresh `sh -c`, so a function
 # defined once wouldn't be visible to the others) clears any running
 # screensaver instance before locking or on resume from its own idle stage.
-exec swayidle -w \
-    lock 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh' \
+# The bracketed "[r]un-screensaver.sh" (not a plain "run-screensaver.sh")
+# matters: pkill -f matches a process's FULL command line, which includes
+# the invoking `sh -c "pkill -f run-screensaver.sh; ..."` shell's own argv
+# -- an unbracketed pattern kills its own parent shell on the first pkill,
+# before the lock command ever runs. The bracket breaks that self-match
+# while still matching the real target.
+#
+# exec_always (not exec) + an explicit pkill first: plain `exec` only runs
+# once at session start -- `swaymsg reload` never restarts it, so editing
+# this block and reloading would keep running the OLD swayidle process
+# (stale command strings baked into its argv from session start) forever,
+# not the new one. The pkill avoids piling up duplicate swayidle daemons
+# (each independently watching idle and firing its own actions) on every
+# reload.
+exec_always pkill -x swayidle; swayidle -w \
+    lock 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh' \
     timeout 150 '$HOME/.local/share/cairn-repo/screensaver/launch-screensaver.sh' \
-        resume 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null' \
-    timeout 300 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh' \
+        resume 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null' \
+    timeout 300 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh' \
     timeout 600 'swaymsg "output * dpms off"' \
         resume 'swaymsg "output * dpms on"' \
-    before-sleep 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
-bindsym $mod+l exec 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
+    before-sleep 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
+bindsym $mod+l exec 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
 # Lock immediately on lid close, not just before-sleep -- suspend can lag
 # behind the physical lid switch (inhibitors, systemd-logind delay), during
 # which the screen would otherwise stay unlocked. No --locked flag: sway
 # skips this automatically if already locked, so re-closing the lid while
 # locked won't stack duplicate rustlock processes.
-bindswitch lid:on exec 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
+bindswitch lid:on exec 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
 
 ### Autostart
 # autotiling: sway has no dwindle-style auto split like Hyprland (always

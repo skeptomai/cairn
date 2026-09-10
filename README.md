@@ -102,6 +102,29 @@ input exits it immediately. Requires the `hypa-ttfx-bin` AUR package
 
 Run it manually any time with `screensaver/launch-screensaver.sh`.
 
+## Lock screen
+
+The actual lock command (`lockscreen/lock.sh`) is
+[`rustlock`](https://github.com/JorySeverijnse/rustlock), not `swaylock` —
+a blurred/vignetted screenshot background, a themed hexagon ring indicator,
+and a centered clock, instead of a flat color and a bare circle. `swaylock`
+stays installed (`packages.txt`) purely as a trivial fallback; it's not
+what any keybind or `swayidle` stage actually calls.
+
+`rustlock` is built from source by `bootstrap.sh`, not installed from AUR,
+because it needs one local patch:
+`lockscreen/rustlock-disable-session-keys.patch` removes its upstream
+`F1`/`F2`/`F3` → suspend/reboot/poweroff bindings, which fire with **no
+password check and no confirmation** — a stray function-key press while
+typing your password would otherwise reboot or power off the machine.
+`bootstrap.sh` clones the latest `rustlock` master, applies the patch,
+builds it, and installs the binary to `/usr/local/bin/rustlock` (ahead of
+`/usr/bin` in `PATH`) every time it runs — there's no version pin, so
+re-running `bootstrap.sh` picks up upstream fixes for free, patch
+permitting. It also installs `lockscreen/rustlock.pam` to
+`/etc/pam.d/rustlock` — required, or PAM falls back to `pam_deny` and
+rejects every password, including a correct one.
+
 ### What `bootstrap.sh` does, in order
 
 1. Installs everything in `packages.txt` via `pacman`, plus the AUR
@@ -165,6 +188,7 @@ cairn/
 ├── install.sh                   # gum-driven wrapper: bootstrap -> setup -> theme
 ├── theming/                     # cross-app theme switcher (palettes/, templates/, apply-theme.py)
 ├── screensaver/                 # ttfx-animated ASCII screensaver, launched by sway/config's swayidle
+├── lockscreen/                   # rustlock config + build patch (see bootstrap.sh)
 ├── sway/config                 # SwayFX compositor config
 ├── waybar/                     # status bar (config-sway.jsonc, style.css, theme.css)
 ├── walker/                     # app launcher
