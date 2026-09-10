@@ -323,6 +323,36 @@ if [ -f /usr/share/wayland-sessions/sway.desktop ]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Lock screen: rustlock, built from source (not the AUR package) because it
+# needs a small local patch -- upstream binds F1/F2/F3 to
+# suspend/reboot/poweroff on the LOCK SCREEN with no auth and no
+# confirmation, so a stray function-key press while typing your password
+# reboots or powers off the machine. lockscreen/rustlock-disable-session-keys.patch
+# removes those three key bindings; everything else about rustlock is
+# unpatched. Re-run this block any time to pick up upstream fixes -- it
+# always rebuilds from the latest master, there's no version pin.
+#
+# The PAM service file is required -- without /etc/pam.d/rustlock, PAM
+# falls back to /etc/pam.d/other (auth required pam_deny.so), so rustlock
+# rejects every password including a correct one, with no error beyond a
+# generic auth failure. Found the hard way 2026-09-09 after rebuilding the
+# binary by hand outside this script and skipping this install step.
+# ---------------------------------------------------------------------------
+
+echo "==> Building rustlock (lock screen) from source with local patch applied"
+RUSTLOCK_PATCH="$PWD/lockscreen/rustlock-disable-session-keys.patch"
+RUSTLOCK_TMP="$(mktemp -d)"
+git clone --depth 1 https://github.com/JorySeverijnse/rustlock.git "$RUSTLOCK_TMP/rustlock"
+(
+  cd "$RUSTLOCK_TMP/rustlock"
+  git apply "$RUSTLOCK_PATCH"
+  cargo build --release
+)
+sudo install -Dm755 "$RUSTLOCK_TMP/rustlock/target/release/rustlock" /usr/local/bin/rustlock
+rm -rf "$RUSTLOCK_TMP"
+sudo install -Dm644 lockscreen/rustlock.pam /etc/pam.d/rustlock
+
+# ---------------------------------------------------------------------------
 # Tailscale: enable the daemon, but joining the tailnet is an interactive
 # step (opens a browser to authenticate) that can't safely be scripted here.
 # ---------------------------------------------------------------------------

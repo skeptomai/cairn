@@ -1,6 +1,6 @@
 {
     "label" : "lock",
-    "action" : "swaylock -f -c 1b1e26",
+    "action" : "sh -c $HOME/.local/share/cairn-repo/lockscreen/lock.sh",
     "text" : "Lock",
     "keybind" : "l"
 }

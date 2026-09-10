@@ -1,0 +1,4 @@
+# PAM configuration for rustlock (see bootstrap.sh -- rustlock is built
+# from source here, not the AUR package, so this file isn't installed for
+# us the way it would be by the AUR PKGBUILD).
+auth include login

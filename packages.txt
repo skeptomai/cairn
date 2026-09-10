@@ -21,6 +21,9 @@
 # bootstrap.sh first.
 swaybg
 swayidle
+# swaylock itself isn't the active lock command (see lockscreen/lock.sh --
+# rustlock, built from source by bootstrap.sh, is) -- kept installed as a
+# trivial, always-available fallback if rustlock ever misbehaves.
 swaylock
 greetd
 greetd-agreety
@@ -128,6 +131,9 @@ btop
 # --- Build tooling (needed to bootstrap yay itself, see bootstrap.sh) ---
 git
 base-devel
+# rust: needed to build rustlock (lock screen) from source with our
+# session-key patch applied, see bootstrap.sh's rustlock section.
+rust
 
 # --- Desktop infrastructure (silently broken without these, but not pulled
 #     in transitively by anything else above) ---

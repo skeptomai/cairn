@@ -380,9 +380,9 @@ the `timeout 600 'output * dpms off'` clause:
 ```
 # ~/.config/sway/local.conf.d/20-vm-no-dpms-idle.conf
 exec_always pkill -x swayidle; swayidle -w \
-    lock "swaylock -f -c 1b1e26" \
-    timeout 300 "swaylock -f -c 1b1e26" \
-    before-sleep "swaylock -f -c 1b1e26"
+    lock "$HOME/.local/share/cairn-repo/lockscreen/lock.sh" \
+    timeout 300 "$HOME/.local/share/cairn-repo/lockscreen/lock.sh" \
+    before-sleep "$HOME/.local/share/cairn-repo/lockscreen/lock.sh"
 ```
 
 Then `swaymsg reload` (or just log out/in). The VM still locks on idle and

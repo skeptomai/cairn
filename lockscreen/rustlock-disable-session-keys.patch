@@ -1,0 +1,30 @@
+diff --git i/src/main.rs w/src/main.rs
+index 144be2d..189d653 100644
+--- i/src/main.rs
++++ w/src/main.rs
+@@ -215,21 +215,10 @@ impl WaylandLock {
+                 self.system_manager.media_prev();
+                 return;
+             }
+-            Keysym::F1 => {
+-                self.system_manager
+-                    .send_command(system::BackendCommand::Suspend);
+-                return;
+-            }
+-            Keysym::F2 => {
+-                self.system_manager
+-                    .send_command(system::BackendCommand::Reboot);
+-                return;
+-            }
+-            Keysym::F3 => {
+-                self.system_manager
+-                    .send_command(system::BackendCommand::PowerOff);
+-                return;
+-            }
++            // F1/F2/F3 suspend/reboot/poweroff intentionally removed here --
++            // upstream fires these with zero auth and zero confirmation, so
++            // a stray function-key press while fumbling for your password
++            // reboots or powers off the machine. Cairn/dotfiles patch.
+             _ => {}
+         }
+ 

@@ -33,20 +33,20 @@ input "type:touchpad" {
 # defined once wouldn't be visible to the others) clears any running
 # screensaver instance before locking or on resume from its own idle stage.
 exec swayidle -w \
-    lock 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; swaylock -f -c 1b1e26' \
+    lock 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh' \
     timeout 150 '$HOME/.local/share/cairn-repo/screensaver/launch-screensaver.sh' \
         resume 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null' \
-    timeout 300 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; swaylock -f -c 1b1e26' \
+    timeout 300 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh' \
     timeout 600 'swaymsg "output * dpms off"' \
         resume 'swaymsg "output * dpms on"' \
-    before-sleep 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; swaylock -f -c 1b1e26'
-bindsym $mod+l exec 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; swaylock -f -c 1b1e26'
+    before-sleep 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
+bindsym $mod+l exec 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
 # Lock immediately on lid close, not just before-sleep -- suspend can lag
 # behind the physical lid switch (inhibitors, systemd-logind delay), during
 # which the screen would otherwise stay unlocked. No --locked flag: sway
 # skips this automatically if already locked, so re-closing the lid while
-# locked won't stack duplicate swaylock processes.
-bindswitch lid:on exec 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; swaylock -f -c 1b1e26'
+# locked won't stack duplicate rustlock processes.
+bindswitch lid:on exec 'pkill -f run-screensaver.sh 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
 
 ### Autostart
 # autotiling: sway has no dwindle-style auto split like Hyprland (always
