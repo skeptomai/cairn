@@ -35,6 +35,12 @@ exec swayidle -w \
         resume 'swaymsg "output * dpms on"' \
     before-sleep 'swaylock -f -c 1b1e26'
 bindsym $mod+l exec swaylock -f -c 1b1e26
+# Lock immediately on lid close, not just before-sleep -- suspend can lag
+# behind the physical lid switch (inhibitors, systemd-logind delay), during
+# which the screen would otherwise stay unlocked. No --locked flag: sway
+# skips this automatically if already locked, so re-closing the lid while
+# locked won't stack duplicate swaylock processes.
+bindswitch lid:on exec swaylock -f -c 1b1e26
 
 ### Autostart
 # autotiling: sway has no dwindle-style auto split like Hyprland (always
