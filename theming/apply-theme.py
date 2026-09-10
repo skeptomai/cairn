@@ -97,7 +97,45 @@ def load_palette(name: str) -> dict:
     if mode not in MODE_DEFAULTS:
         sys.exit(f"{path}: unknown mode '{mode}' (expected 'light' or 'dark')")
     tokens.update(MODE_DEFAULTS[mode])
+    tokens.update(emacs_mode_tokens(mode, tokens))
     return tokens
+
+
+def emacs_mode_tokens(mode: str, tokens: dict) -> dict:
+    """Mode-line and LSP-popup colors for emacs-theme.el.tmpl, computed from
+    tokens already in the palette -- no new palette fields needed. Ported
+    from cairn-emacs-themer's predecessor (omarchy-emacs-themer's
+    20-emacs.sh), which branched on a `light.mode` sentinel file; cairn's
+    `mode` field replaces that check.
+
+    Light: active mode-line/LSP-popup use `selection`+`fg` (stands out from
+    the near-white editor bg); inactive/header fall back to `bg`/`bright-black`.
+    Dark: both use `black` (the ANSI black -- a dark panel color) with `fg`,
+    since there's no separate "selection" panel look needed on dark themes.
+    """
+    if mode == "light":
+        return {
+            "ml-active-bg": tokens["selection"],
+            "ml-active-fg": tokens["fg"],
+            "ml-inactive-bg": tokens["bg"],
+            "ml-inactive-fg": tokens["bright-black"],
+            "ml-emphasis-fg": tokens["fg"],
+            "lsp-doc-bg": tokens["selection"],
+            "lsp-doc-fg": tokens["fg"],
+            "lsp-doc-header-bg": tokens["blue"],
+            "lsp-doc-header-fg": tokens["bg"],
+        }
+    return {
+        "ml-active-bg": tokens["black"],
+        "ml-active-fg": tokens["fg"],
+        "ml-inactive-bg": tokens["black"],
+        "ml-inactive-fg": tokens["bright-black"],
+        "ml-emphasis-fg": tokens["blue"],
+        "lsp-doc-bg": tokens["black"],
+        "lsp-doc-fg": tokens["fg"],
+        "lsp-doc-header-bg": tokens["bright-black"],
+        "lsp-doc-header-fg": tokens["fg"],
+    }
 
 
 def render(template_path: Path, tokens: dict) -> str:
@@ -150,6 +188,17 @@ TARGETS = [
     # on every preset switch rather than needing a per-preset file.
     ("btop-theme.theme.tmpl", CACHYOS / "btop" / "themes" / "cachyos.theme", None),
 ]
+
+# Loaded via cairn-emacs-themer (github.com/skeptomai/cairn-emacs-themer).
+# reload()'s own FileNotFoundError/timeout handling already covers
+# emacsclient not being installed or no server running -- same
+# graceful-skip behavior as swaync-client/busctl above, nothing special
+# needed here for "Emacs might not be open."
+EMACS_THEME_PATH = CACHYOS / "emacs" / "cairn-theme.el"
+TARGETS.append((
+    "emacs-theme.el.tmpl", EMACS_THEME_PATH,
+    ["emacsclient", "-e", f'(cairn-themer-install-and-load "{EMACS_THEME_PATH}")'],
+))
 
 ALACRITTY_TEMPLATE = "alacritty-theme.toml.tmpl"
 
