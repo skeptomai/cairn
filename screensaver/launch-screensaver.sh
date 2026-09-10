@@ -6,9 +6,31 @@
 #
 # Wired into sway/config's swayidle timeout chain -- not meant to be run
 # interactively, though `./launch-screensaver.sh` works fine for testing.
+#
+# Usage:
+#   ./launch-screensaver.sh                 idle-timeout / preview behavior:
+#                                            any keypress just dismisses it
+#   ./launch-screensaver.sh --lock-on-exit   "lock" behavior: the screensaver
+#                                            plays first, and dismissing it
+#                                            (any keypress) hands off directly
+#                                            into the real lock (lockscreen/
+#                                            lock.sh) instead of revealing the
+#                                            desktop. Note this is NOT an
+#                                            actual session lock by itself --
+#                                            it's a plain window, so there's a
+#                                            brief window where the screen is
+#                                            covered but not yet genuinely
+#                                            locked. Deliberately not used for
+#                                            lid-close/before-sleep, which
+#                                            need to lock instantly.
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+LOCK_ON_EXIT=""
+if [ "${1:-}" = "--lock-on-exit" ]; then
+  LOCK_ON_EXIT="$SCRIPT_DIR/../lockscreen/lock.sh"
+fi
 
 # Already running (one or more outputs) -- don't stack a second set.
 pgrep -f 'run-screensaver\.sh' &>/dev/null && exit 0
@@ -27,7 +49,7 @@ for output in $(swaymsg -t get_outputs | jq -r '.[] | select(.active) | .name');
   # (ghostty titles a -e window with the command it's running).
   swaymsg exec -- ghostty --font-size=18 \
     --window-padding-x=0 --window-padding-y=0 \
-    -e "$SCRIPT_DIR/run-screensaver.sh" >/dev/null
+    -e "$SCRIPT_DIR/run-screensaver.sh" "$LOCK_ON_EXIT" >/dev/null
   # No IPC event to wait on here (unlike Hyprland's socket/niri's window-id
   # polling) -- a short fixed sleep is enough to keep each output's window
   # from piling onto whichever one is still focused when the next exec

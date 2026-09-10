@@ -1,6 +1,6 @@
 {
     "label" : "lock",
-    "action" : "sh -c $HOME/.local/share/cairn-repo/lockscreen/lock.sh",
+    "action" : "sh -c 'pkill -f \"[r]un-screensaver.sh\" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/screensaver/launch-screensaver.sh --lock-on-exit'",
     "text" : "Lock",
     "keybind" : "l"
 }

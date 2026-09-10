@@ -54,7 +54,9 @@ exec_always pkill -x swayidle; swayidle -w \
     timeout 600 'swaymsg "output * dpms off"' \
         resume 'swaymsg "output * dpms on"' \
     before-sleep 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
-bindsym $mod+l exec 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
+# Screensaver plays first; dismissing it (any keypress) hands off directly
+# into the real lock -- see screensaver/launch-screensaver.sh's --lock-on-exit.
+bindsym $mod+l exec 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/screensaver/launch-screensaver.sh --lock-on-exit'
 # On-demand screensaver trigger (no swayidle timeout, just the same launch
 # script the 150s idle stage calls) -- for previewing it without waiting.
 bindsym $mod+Shift+l exec $HOME/.local/share/cairn-repo/screensaver/launch-screensaver.sh
