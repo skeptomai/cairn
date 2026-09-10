@@ -34,12 +34,15 @@ Verified end-to-end on 2026-09-09 (see `VM-TESTING.md`).
    ./install.sh
    ```
 
-   `install.sh` is gum-driven and narrates each step, confirming before it
-   does anything: it self-installs `gum` if missing (chicken-and-egg on a
-   truly fresh system), then walks through `bootstrap.sh` (packages,
-   hibernation swapfile, mkinitcpio/limine, greetd, UWSM session, Tailscale
-   enable, keyboard layout), `setup.sh` (symlinks every tracked config into
-   `~/.config`), and a theme picker, and finally offers to reboot for you.
+   `install.sh` is driven by [`gum`](https://github.com/charmbracelet/gum)
+   (a small CLI tool for interactive prompts/confirmations in shell
+   scripts) — it self-installs `gum` first if missing (chicken-and-egg on
+   a truly fresh system, since nothing else here has installed it yet),
+   then narrates and confirms each step before doing anything: `bootstrap.sh`
+   (packages, hibernation swapfile, mkinitcpio/limine, greetd, UWSM session,
+   Tailscale enable, keyboard layout), `setup.sh` (symlinks every tracked
+   config into `~/.config`), and a theme picker, finally offering to reboot
+   for you.
 
    Prefer to run the pieces yourself instead:
 
