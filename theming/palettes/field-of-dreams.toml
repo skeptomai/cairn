@@ -1,0 +1,35 @@
+# Field of Dreams — translated from the user's own Omarchy theme
+# (omarchy-themes/field-of-dreams/colors.toml). Omarchy's colors.toml has no
+# elevation-layer colors, so bg-alt/hover-bg are algorithmically
+# blended toward fg (10%/20% toward fg) rather than sourced from a
+# canonical secondary swatch like the other presets here; hover-fg
+# defaults to plain fg, matching most other presets' convention.
+name = "Field of Dreams"
+mode = "dark"
+
+bg = "#17181a"
+fg = "#d4d4d4"
+bg-alt = "#2a2b2d"
+hover-bg = "#3d3e3f"
+hover-fg = "#d4d4d4"
+accent = "#6b8199"
+danger = "#b85d5d"
+selection = "#6b8199"
+
+black   = "#17181a"
+red     = "#b85d5d"
+green   = "#7a9b7a"
+yellow  = "#a89b6b"
+blue    = "#6b8199"
+magenta = "#997a8d"
+cyan    = "#669999"
+white   = "#d4d4d4"
+
+bright-black   = "#4a4a4a"
+bright-red     = "#c97676"
+bright-green   = "#8fb18f"
+bright-yellow  = "#bdb088"
+bright-blue    = "#7d96b0"
+bright-magenta = "#b08fa2"
+bright-cyan    = "#7db3b3"
+bright-white   = "#e8e8e8"

@@ -1,0 +1,35 @@
+# Stone Creature — translated from the user's own Omarchy theme
+# (omarchy-themes/stone-creature/colors.toml). Omarchy's colors.toml has no
+# elevation-layer colors, so bg-alt/hover-bg are algorithmically
+# blended toward fg (20%/30% toward fg) rather than sourced from a
+# canonical secondary swatch like the other presets here; hover-fg
+# defaults to plain fg, matching most other presets' convention.
+name = "Stone Creature"
+mode = "light"
+
+bg = "#d8d5cd"
+fg = "#2e2e2e"
+bg-alt = "#b6b4ad"
+hover-bg = "#a5a39d"
+hover-fg = "#2e2e2e"
+accent = "#1e66f5"
+danger = "#d20f39"
+selection = "#1e66f5"
+
+black   = "#2e2e2e"
+red     = "#d20f39"
+green   = "#40a02b"
+yellow  = "#b85400"
+blue    = "#1e66f5"
+magenta = "#8839ef"
+cyan    = "#179299"
+white   = "#cccac2"
+
+bright-black   = "#5c5f77"
+bright-red     = "#d20f39"
+bright-green   = "#40a02b"
+bright-yellow  = "#b85400"
+bright-blue    = "#1e66f5"
+bright-magenta = "#8839ef"
+bright-cyan    = "#179299"
+bright-white   = "#d8d5cd"

@@ -1,0 +1,35 @@
+# Rancho Bravo — translated from the user's own Omarchy theme
+# (omarchy-themes/rancho-bravo/colors.toml). Omarchy's colors.toml has no
+# elevation-layer colors, so bg-alt/hover-bg are algorithmically
+# blended toward fg (20%/30% toward fg) rather than sourced from a
+# canonical secondary swatch like the other presets here; hover-fg
+# defaults to plain fg, matching most other presets' convention.
+name = "Rancho Bravo"
+mode = "light"
+
+bg = "#fafafa"
+fg = "#090a0b"
+bg-alt = "#cacaca"
+hover-bg = "#b2b2b2"
+hover-fg = "#090a0b"
+accent = "#1057ef"
+danger = "#e45649"
+selection = "#1057ef"
+
+black   = "#fafafa"
+red     = "#e45649"
+green   = "#50a14f"
+yellow  = "#c18401"
+blue    = "#1057ef"
+magenta = "#a626a4"
+cyan    = "#0184bc"
+white   = "#383a42"
+
+bright-black   = "#6b6b6f"
+bright-red     = "#e45649"
+bright-green   = "#50a14f"
+bright-yellow  = "#c18401"
+bright-blue    = "#0c3eaa"
+bright-magenta = "#a626a4"
+bright-cyan    = "#0184bc"
+bright-white   = "#090a0b"
