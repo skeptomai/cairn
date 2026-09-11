@@ -185,6 +185,7 @@ bindsym $mod+r mode "resize"
 ### Window rules
 for_window [app_id="com.mitchellh.ghostty" title="btop"] floating enable, resize set 900 650, move position center
 for_window [app_id="blueman-manager"] floating enable, resize set 700 500, move position center
+for_window [app_id="waypaper"] floating enable, resize set 1000 700, move position center
 # ghostty's --class only affects X11 WM_CLASS, not the Wayland app_id it
 # actually reports here -- match on title instead (ghostty titles a -e
 # window with the command it's running).
