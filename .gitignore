@@ -4,3 +4,6 @@
 # different keyboard layout, etc.) physically land inside this checkout.
 # Deliberately not tracked.
 sway/local.conf.d/
+
+# Bytecode cache from running theming/apply-theme.py directly.
+__pycache__/
