@@ -105,7 +105,13 @@ bindsym $mod+Shift+q reload
 bindsym $mod+Shift+e exec wlogout
 bindsym $mod+e exec thunar
 bindsym $mod+w exec firefox
-bindsym $mod+Shift+w exec waypaper --backend swaybg --folder /usr/share/wallpapers/cachyos-wallpapers
+# Browses the *active* theme preset's own backgrounds/ folder (set by
+# apply-theme.py's apply_wallpaper(), which always defaults to 1-*) so this
+# key lets you flip between that preset's alternates instead of a generic
+# system wallpaper set. Resolves the repo root via the ~/.config/sway
+# symlink rather than a hardcoded path, since setup.sh symlinks this whole
+# directory in from wherever the repo happens to be checked out.
+bindsym $mod+Shift+w exec sh -c 'root="$(dirname "$(realpath "$HOME/.config/sway")")"; waypaper --backend swaybg --folder "$root/theming/palettes/$(cat "$root/theming/.current-preset")/backgrounds"'
 bindsym $mod+Shift+g exec waypaper --config-file ~/.config/waypaper/greeter-config.ini --state-file ~/.local/state/waypaper/greeter-state.ini --backend none
 bindsym $mod+ctrl+shift+space exec walker -m menus:cachyosthemes
 

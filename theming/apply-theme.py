@@ -252,6 +252,29 @@ def apply_chromium_theme(tokens: dict) -> None:
         reload(["chromium", "--refresh-platform-policy", "--no-startup-window"])
 
 
+def apply_wallpaper(preset: str) -> None:
+    """Set the preset's wallpaper via waypaper. Always picks backgrounds/1-*
+    (the lowest-numbered file) -- deterministic by design, not random: 2-*
+    and 3-* exist as alternates a user can still pick by hand (mod+shift+w),
+    not as a rotation. Presets without a backgrounds/ dir yet are skipped
+    quietly, same as apply_chromium_theme's "step not present" skip.
+    """
+    backgrounds = PALETTES / preset / "backgrounds"
+    if not backgrounds.is_dir():
+        return
+    candidates = sorted(
+        p for p in backgrounds.iterdir()
+        if p.suffix.lower() in (".jpg", ".jpeg", ".png") and p.stem[0].isdigit()
+    )
+    if not candidates:
+        return
+    wallpaper = candidates[0]
+    if not shutil.which("waypaper"):
+        return
+    reload(["waypaper", "--wallpaper", str(wallpaper), "--backend", "swaybg", "--fill", "fill"])
+    print(f"  waypaper: {wallpaper.name}")
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"usage: {sys.argv[0]} <preset-name>")
@@ -289,6 +312,7 @@ def main() -> None:
 
     apply_gsettings_mode(tokens.get("mode", "dark"), tokens)
     apply_chromium_theme(tokens)
+    apply_wallpaper(preset)
 
     print(f"\ntheme '{preset}' applied.")
     print("kdeglobals changes take effect the next time a KDE-Frameworks app launches.")
