@@ -270,6 +270,13 @@ XKB_ENV="XKB_DEFAULT_LAYOUT=$XKB_LAYOUT"
 echo "==> Installing greetd config (keyboard layout matched to the session below)"
 sed "s#{{XKB_ENV}}#$XKB_ENV#" greetd/config.toml.tmpl | sudo tee /etc/greetd/config.toml >/dev/null
 sudo install -m 644 greetd/regreet.toml /etc/greetd/regreet.toml
+# One of the user's own stone-creature theme photos (see theming/palettes/
+# stone-creature/backgrounds/5-goyle5.jpg) -- tracked here like every other
+# theme background, so a fresh install gets a real greeter wallpaper with no
+# manual step. An earlier version of this file was a 24MB uncompressed PNG
+# copied in by hand and deliberately left untracked; this one is a properly
+# sized JPEG (~950KB), in line with every other tracked wallpaper.
+sudo install -m 644 greetd/wallpaper.jpg /etc/greetd/wallpaper.jpg
 
 echo "==> Writing matching sway keyboard layout to sway/local.conf.d/ (not tracked in git -- see sway/config's tail)"
 # Written into the repo checkout itself (not $HOME/.config/sway/local.conf.d)
@@ -286,7 +293,6 @@ mkdir -p "sway/local.conf.d"
   [ -n "$XKB_OPTIONS" ] && echo "    xkb_options $XKB_OPTIONS"
   echo "}"
 } > "sway/local.conf.d/10-keyboard.conf"
-[ -f /etc/greetd/wallpaper.png ] || echo "    NOTE: /etc/greetd/wallpaper.png not present -- copy one manually (not tracked in git, it's a 24MB binary)"
 sudo systemctl enable greetd.service
 
 # ---------------------------------------------------------------------------

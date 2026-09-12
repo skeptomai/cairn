@@ -1,5 +1,5 @@
 [background]
-path = "/etc/greetd/wallpaper.png"
+path = "/etc/greetd/wallpaper.jpg"
 fit = "Cover"
 
 [GTK]

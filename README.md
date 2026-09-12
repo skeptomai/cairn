@@ -187,8 +187,10 @@ fixed).
    on 2026-09-05.
 3. Installs `/etc/greetd/config.toml` (rendered from `greetd/config.toml.tmpl`
    using `localectl`'s currently-configured layout — whatever you picked in
-   the CachyOS installer, not a hardcoded default) and `/etc/greetd/regreet.toml`,
-   and writes the same layout to `~/.config/sway/local.conf.d/10-keyboard.conf`
+   the CachyOS installer, not a hardcoded default), `/etc/greetd/regreet.toml`,
+   and `/etc/greetd/wallpaper.jpg` (one of the `stone-creature` theme's own
+   background photos), and writes the same layout to
+   `~/.config/sway/local.conf.d/10-keyboard.conf`
    so the real session matches. These have to agree, or correctly-typed
    passwords look like login failures — the greeter and your real session
    are separate processes reading separate layout config. Enables
@@ -249,17 +251,12 @@ cairn/
 ├── uwsm/                       # -> symlinked to ~/.config/uwsm (SWAY_UNSUPPORTED_GPU env var)
 ├── wayland-sessions/            # sway-uwsm.desktop (root-owned at runtime,
 │                                 #   installed by bootstrap.sh, not symlinked)
-└── greetd/                     # config.toml, regreet.toml (root-owned at runtime,
-                                 #   installed by bootstrap.sh, not symlinked)
+└── greetd/                     # config.toml, regreet.toml, wallpaper.jpg (root-owned
+                                 #   at runtime, installed by bootstrap.sh, not symlinked)
 ```
 
 Note: `swayosd` and `yazi` are in `packages.txt` but have no tracked config
 here — both work fine on their packaged defaults on this machine.
-
-## Not tracked here
-
-- `/etc/greetd/wallpaper.png` — a 24MB binary, not worth committing. Copy one
-  manually after a fresh install; `bootstrap.sh` will warn if it's missing.
 
 ## Troubleshooting
 
