@@ -30,8 +30,8 @@ IntensityAmount=0
 IntensityEffect=0
 
 [Colors:Button]
-BackgroundAlternate=239,241,245
-BackgroundNormal=239,241,245
+BackgroundAlternate=216,213,205
+BackgroundNormal=216,213,205
 DecorationFocus=30,102,245
 DecorationHover=30,102,245
 ForegroundActive=30,102,245
@@ -39,13 +39,13 @@ ForegroundInactive=110,90,85
 ForegroundLink=150,80,50
 ForegroundNegative=176,40,20
 ForegroundNeutral=130,105,10
-ForegroundNormal=76,79,105
+ForegroundNormal=46,46,46
 ForegroundPositive=130,105,10
 ForegroundVisited=130,70,55
 
 [Colors:Complementary]
-BackgroundAlternate=239,241,245
-BackgroundNormal=239,241,245
+BackgroundAlternate=216,213,205
+BackgroundNormal=216,213,205
 DecorationFocus=30,102,245
 DecorationHover=30,102,245
 ForegroundActive=30,102,245
@@ -53,13 +53,13 @@ ForegroundInactive=110,90,85
 ForegroundLink=150,80,50
 ForegroundNegative=176,40,20
 ForegroundNeutral=130,105,10
-ForegroundNormal=76,79,105
+ForegroundNormal=46,46,46
 ForegroundPositive=130,105,10
 ForegroundVisited=130,70,55
 
 [Colors:Header]
-BackgroundAlternate=239,241,245
-BackgroundNormal=239,241,245
+BackgroundAlternate=216,213,205
+BackgroundNormal=216,213,205
 DecorationFocus=30,102,245
 DecorationHover=30,102,245
 ForegroundActive=30,102,245
@@ -67,13 +67,13 @@ ForegroundInactive=110,90,85
 ForegroundLink=150,80,50
 ForegroundNegative=176,40,20
 ForegroundNeutral=130,105,10
-ForegroundNormal=76,79,105
+ForegroundNormal=46,46,46
 ForegroundPositive=130,105,10
 ForegroundVisited=130,70,55
 
 [Colors:Header][Inactive]
-BackgroundAlternate=239,241,245
-BackgroundNormal=239,241,245
+BackgroundAlternate=216,213,205
+BackgroundNormal=216,213,205
 DecorationFocus=30,102,245
 DecorationHover=30,102,245
 ForegroundActive=30,102,245
@@ -81,27 +81,27 @@ ForegroundInactive=110,90,85
 ForegroundLink=150,80,50
 ForegroundNegative=176,40,20
 ForegroundNeutral=130,105,10
-ForegroundNormal=76,79,105
+ForegroundNormal=46,46,46
 ForegroundPositive=130,105,10
 ForegroundVisited=130,70,55
 
 [Colors:Selection]
-BackgroundAlternate=239,241,245
-BackgroundNormal=188,192,204
+BackgroundAlternate=216,213,205
+BackgroundNormal=165,163,157
 DecorationFocus=30,102,245
 DecorationHover=30,102,245
-ForegroundActive=239,241,245
+ForegroundActive=216,213,205
 ForegroundInactive=110,90,85
 ForegroundLink=150,80,50
 ForegroundNegative=120,0,8
 ForegroundNeutral=100,80,0
-ForegroundNormal=76,79,105
+ForegroundNormal=46,46,46
 ForegroundPositive=100,80,0
 ForegroundVisited=130,70,55
 
 [Colors:Tooltip]
-BackgroundAlternate=239,241,245
-BackgroundNormal=239,241,245
+BackgroundAlternate=216,213,205
+BackgroundNormal=216,213,205
 DecorationFocus=30,102,245
 DecorationHover=30,102,245
 ForegroundActive=30,102,245
@@ -109,13 +109,13 @@ ForegroundInactive=110,90,85
 ForegroundLink=150,80,50
 ForegroundNegative=176,40,20
 ForegroundNeutral=130,105,10
-ForegroundNormal=76,79,105
+ForegroundNormal=46,46,46
 ForegroundPositive=130,105,10
 ForegroundVisited=130,70,55
 
 [Colors:View]
-BackgroundAlternate=239,241,245
-BackgroundNormal=239,241,245
+BackgroundAlternate=216,213,205
+BackgroundNormal=216,213,205
 DecorationFocus=30,102,245
 DecorationHover=30,102,245
 ForegroundActive=30,102,245
@@ -123,13 +123,13 @@ ForegroundInactive=110,90,85
 ForegroundLink=150,80,50
 ForegroundNegative=176,40,20
 ForegroundNeutral=130,105,10
-ForegroundNormal=76,79,105
+ForegroundNormal=46,46,46
 ForegroundPositive=130,105,10
 ForegroundVisited=130,70,55
 
 [Colors:Window]
-BackgroundAlternate=239,241,245
-BackgroundNormal=239,241,245
+BackgroundAlternate=216,213,205
+BackgroundNormal=216,213,205
 DecorationFocus=30,102,245
 DecorationHover=30,102,245
 ForegroundActive=30,102,245
@@ -137,13 +137,13 @@ ForegroundInactive=110,90,85
 ForegroundLink=150,80,50
 ForegroundNegative=176,40,20
 ForegroundNeutral=130,105,10
-ForegroundNormal=76,79,105
+ForegroundNormal=46,46,46
 ForegroundPositive=130,105,10
 ForegroundVisited=130,70,55
 
 [General]
-ColorScheme=cachyos-Catppuccin Latte
-Name=Catppuccin Latte
+ColorScheme=cachyos-Stone Creature
+Name=Stone Creature
 TerminalApplication=ghostty
 
 [Icons]
@@ -157,9 +157,9 @@ widgetStyle=kvantum
 ColorScheme=colors
 
 [WM]
-activeBackground=239,241,245
+activeBackground=216,213,205
 activeBlend=30,102,245
-activeForeground=76,79,105
-inactiveBackground=239,241,245
-inactiveBlend=76,79,105
-inactiveForeground=76,79,105
+activeForeground=46,46,46
+inactiveBackground=216,213,205
+inactiveBlend=46,46,46
+inactiveForeground=46,46,46

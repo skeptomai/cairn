@@ -2,10 +2,10 @@
  * palette TOML instead and re-run apply-theme.py.
  *
  * */
-@define-color text-color #4c4f69;
+@define-color text-color #2e2e2e;
 /* was a hardcoded near-black -- invisible against a dark palette's bg;
  * self-adapts to any palette by dimming the real text color instead. */
-@define-color text-color-disabled alpha(#4c4f69, 0.5);
+@define-color text-color-disabled alpha(#2e2e2e, 0.5);
 
 /*
  *
@@ -13,7 +13,7 @@
  *
  * */
 /* background */
-@define-color sw-cc-bg #eff1f5;
+@define-color sw-cc-bg #d8d5cd;
 /* border */
 @define-color sw-cc-border-color #1e66f5;
 
@@ -33,13 +33,13 @@
 *
 * */
 /* background */
-@define-color sw-noti-window-bg #eff1f5;
+@define-color sw-noti-window-bg #d8d5cd;
 /* border */
 @define-color sw-noti-window-br #1e66f5;
 /* color */
-@define-color sw-noti-window-txt #4c4f69;
+@define-color sw-noti-window-txt #2e2e2e;
 /* hover */
-@define-color sw-noti-bg-hover #ccd0da;
+@define-color sw-noti-bg-hover #b6b4ad;
 
 @define-color noti-bg-hover @sw-noti-bg-hover;
 
@@ -65,9 +65,9 @@
 *
 * */
 /* foreground */
-@define-color sw-msg-sum-fg #4c4f69;
+@define-color sw-msg-sum-fg #2e2e2e;
 /* body */
-@define-color sw-msg-body #4c4f69;
+@define-color sw-msg-body #2e2e2e;
 
 
 .notification-row .notification-background .notification .notification-default-action .notification-content .text-box .summary {
@@ -95,11 +95,11 @@
 *
 * */
 /* icon */
-@define-color sw-noti-gr-icon #4c4f69;
+@define-color sw-noti-gr-icon #2e2e2e;
 /* button */
-@define-color sw-noti-gr-collapse-but-hvr #bcc0cc;
+@define-color sw-noti-gr-collapse-but-hvr #a5a39d;
 /* icon */
-@define-color sw-noti-gr-collapse-but-icon #4c4f69;
+@define-color sw-noti-gr-collapse-but-icon #2e2e2e;
 
 .notification-group .notification-group-headers .notification-group-icon {
   color: @sw-noti-gr-icon;

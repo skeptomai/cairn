@@ -18,27 +18,27 @@
  ((((class color) (min-colors #xFFFFFF)))
 
    ;; Color palette from the cairn preset
-   (bg          "#eff1f5")
-   (fg          "#4c4f69")
-   (cursor-fg   "#eff1f5")
+   (bg          "#d8d5cd")
+   (fg          "#2e2e2e")
+   (cursor-fg   "#d8d5cd")
    (cursor-bg   "#1e66f5")
-   (sel-bg      "#acb0be")
-   (black       "#bcc0cc")
+   (sel-bg      "#1e66f5")
+   (black       "#2e2e2e")
    (red         "#d20f39")
    (green       "#40a02b")
-   (yellow      "#df8e1d")
+   (yellow      "#b85400")
    (blue        "#1e66f5")
-   (magenta     "#ea76cb")
+   (magenta     "#8839ef")
    (cyan        "#179299")
-   (white       "#5c5f77")
-   (br-black    "#acb0be")
+   (white       "#cccac2")
+   (br-black    "#5c5f77")
    (br-red      "#d20f39")
    (br-green    "#40a02b")
-   (br-yellow   "#df8e1d")
+   (br-yellow   "#b85400")
    (br-blue     "#1e66f5")
-   (br-magenta  "#ea76cb")
+   (br-magenta  "#8839ef")
    (br-cyan     "#179299")
-   (br-white    "#6c6f85")
+   (br-white    "#d8d5cd")
    )
 
  ;; Face mappings (aligned with Zed/VSCode/Neovim mappings)
@@ -83,10 +83,10 @@
   (font-lock-regexp-grouping-backslash (:foreground cyan))
 
   ;; Mode line — colors computed mode-aware in apply-theme.py
-  (mode-line                        (:foreground "#4c4f69" :background "#acb0be"))
-  (mode-line-inactive               (:foreground "#acb0be" :background "#eff1f5"))
-  (mode-line-emphasis               (:foreground "#4c4f69" :bold t))
-  (mode-line-buffer-id              (:foreground "#4c4f69" :bold t))
+  (mode-line                        (:foreground "#2e2e2e" :background "#1e66f5"))
+  (mode-line-inactive               (:foreground "#5c5f77" :background "#d8d5cd"))
+  (mode-line-emphasis               (:foreground "#2e2e2e" :bold t))
+  (mode-line-buffer-id              (:foreground "#2e2e2e" :bold t))
 
   ;; Errors / warnings
   (error                            (:foreground red))
@@ -117,8 +117,8 @@
   (lsp-face-highlight-write         (:background sel-bg :underline t))
 
   ;; LSP UI doc popup — body and header computed mode-aware in apply-theme.py
-  (lsp-ui-doc-background            (:foreground "#4c4f69" :background "#acb0be"))
-  (lsp-ui-doc-header                (:foreground "#eff1f5" :background "#1e66f5" :bold t))
+  (lsp-ui-doc-background            (:foreground "#2e2e2e" :background "#1e66f5"))
+  (lsp-ui-doc-header                (:foreground "#d8d5cd" :background "#1e66f5" :bold t))
   (lsp-ui-doc-url                   (:foreground blue :underline t))
 
  ))
@@ -131,10 +131,10 @@
 ;; hex color strings expand naturally from the palette tokens above.
 (custom-theme-set-faces 'cairn
   '(flycheck-error   ((t (:underline (:style wave :color "#d20f39")))))
-  '(flycheck-warning ((t (:underline (:style wave :color "#df8e1d")))))
+  '(flycheck-warning ((t (:underline (:style wave :color "#b85400")))))
   '(flycheck-info    ((t (:underline (:style wave :color "#179299")))))
   '(flymake-error    ((t (:underline (:style wave :color "#d20f39")))))
-  '(flymake-warning  ((t (:underline (:style wave :color "#df8e1d")))))
+  '(flymake-warning  ((t (:underline (:style wave :color "#b85400")))))
   '(flymake-note     ((t (:underline (:style wave :color "#179299"))))))
 
 (provide-theme 'cairn)

@@ -2,80 +2,80 @@
 # palette TOML instead and re-run apply-theme.py.
 
 # Main bg
-theme[main_bg]="#eff1f5"
+theme[main_bg]="#d8d5cd"
 
 # Main text color
-theme[main_fg]="#4c4f69"
+theme[main_fg]="#2e2e2e"
 
 # Title color for boxes
-theme[title]="#4c4f69"
+theme[title]="#2e2e2e"
 
 # Highlight color for keyboard shortcuts
 theme[hi_fg]="#1e66f5"
 
 # Background color of selected item in processes box
-theme[selected_bg]="#bcc0cc"
+theme[selected_bg]="#a5a39d"
 
 # Foreground color of selected item in processes box
-theme[selected_fg]="#4c4f69"
+theme[selected_fg]="#2e2e2e"
 
 # Color of inactive/disabled text
-theme[inactive_fg]="#acb0be"
+theme[inactive_fg]="#5c5f77"
 
 # Misc colors for processes box including mini cpu graphs, details memory graph and details status text
 theme[proc_misc]="#1e66f5"
 
 # Cpu box outline color
-theme[cpu_box]="#ccd0da"
+theme[cpu_box]="#b6b4ad"
 
 # Memory/disks box outline color
-theme[mem_box]="#ccd0da"
+theme[mem_box]="#b6b4ad"
 
 # Net up/down box outline color
-theme[net_box]="#ccd0da"
+theme[net_box]="#b6b4ad"
 
 # Processes box outline color
-theme[proc_box]="#ccd0da"
+theme[proc_box]="#b6b4ad"
 
 # Box divider line and small boxes line color
-theme[div_line]="#ccd0da"
+theme[div_line]="#b6b4ad"
 
 # Temperature graph colors
 theme[temp_start]="#40a02b"
-theme[temp_mid]="#df8e1d"
+theme[temp_mid]="#b85400"
 theme[temp_end]="#d20f39"
 
 # CPU graph colors
 theme[cpu_start]="#1e66f5"
-theme[cpu_mid]="#ea76cb"
+theme[cpu_mid]="#8839ef"
 theme[cpu_end]="#d20f39"
 
 # Mem/Disk free meter
 theme[free_start]="#40a02b"
-theme[free_mid]="#df8e1d"
+theme[free_mid]="#b85400"
 theme[free_end]="#d20f39"
 
 # Mem/Disk cached meter
 theme[cached_start]="#179299"
 theme[cached_mid]="#1e66f5"
-theme[cached_end]="#ea76cb"
+theme[cached_end]="#8839ef"
 
 # Mem/Disk available meter
 theme[available_start]="#40a02b"
-theme[available_mid]="#df8e1d"
+theme[available_mid]="#b85400"
 theme[available_end]="#d20f39"
 
 # Mem/Disk used meter
 theme[used_start]="#1e66f5"
-theme[used_mid]="#ea76cb"
+theme[used_mid]="#8839ef"
 theme[used_end]="#d20f39"
 
 # Download graph colors
 theme[download_start]="#40a02b"
-theme[download_mid]="#df8e1d"
+theme[download_mid]="#b85400"
 theme[download_end]="#d20f39"
 
 # Upload graph colors
 theme[upload_start]="#179299"
 theme[upload_mid]="#1e66f5"
-theme[upload_end]="#ea76cb"
+theme[upload_end]="#8839ef"
