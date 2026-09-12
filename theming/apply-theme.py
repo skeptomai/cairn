@@ -187,6 +187,10 @@ TARGETS = [
     # README) to "cachyos", so this same file just gets overwritten in place
     # on every preset switch rather than needing a per-preset file.
     ("btop-theme.theme.tmpl", CACHYOS / "btop" / "themes" / "cachyos.theme", None),
+    # Vesktop/Vencord hot-reloads quickCss.css on write -- no reload command
+    # needed, unlike everything else in this list that needs a kill signal
+    # or D-Bus call.
+    ("discord-quickcss.css.tmpl", CACHYOS / "vesktop" / "quickcss.css", None),
 ]
 
 # Loaded via cairn-emacs-themer (github.com/skeptomai/cairn-emacs-themer).
@@ -252,6 +256,28 @@ def apply_chromium_theme(tokens: dict) -> None:
         reload(["chromium", "--refresh-platform-policy", "--no-startup-window"])
 
 
+VESKTOP_SETTINGS_PATH = Path.home() / ".config" / "vesktop" / "settings" / "settings.json"
+
+
+def ensure_vesktop_quickcss_enabled() -> None:
+    """Vesktop's `useQuickCss` toggle lives in live app settings (Vesktop's
+    own state, not something this repo symlinks), so a preset switch alone
+    can't guarantee it's on -- a fresh install or a toggle flipped off by
+    hand would silently leave quickcss.css written but ignored. Patches it
+    back to true every run, same "resync live state alongside the file
+    write" idea as apply_gsettings_mode above. Skipped quietly if Vesktop
+    has never been launched yet (no settings.json to patch).
+    """
+    if not VESKTOP_SETTINGS_PATH.exists():
+        return
+    data = json.loads(VESKTOP_SETTINGS_PATH.read_text())
+    if data.get("useQuickCss") is True:
+        return
+    data["useQuickCss"] = True
+    VESKTOP_SETTINGS_PATH.write_text(json.dumps(data, indent=4))
+    print(f"  vesktop: enabled useQuickCss in {VESKTOP_SETTINGS_PATH}")
+
+
 def apply_wallpaper(preset: str) -> None:
     """Set the preset's wallpaper via waypaper. Always picks backgrounds/1-*
     (the lowest-numbered file) -- deterministic by design, not random: 2-*
@@ -312,6 +338,7 @@ def main() -> None:
 
     apply_gsettings_mode(tokens.get("mode", "dark"), tokens)
     apply_chromium_theme(tokens)
+    ensure_vesktop_quickcss_enabled()
     apply_wallpaper(preset)
 
     print(f"\ntheme '{preset}' applied.")

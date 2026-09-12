@@ -85,3 +85,31 @@ producing a half-themed desktop.
   also the same backend the Chromium point above depends on.
 - **fastfetch**: no config currently tracked, nothing broken to fix; its
   logo art is mood/wallpaper-adjacent, not palette-driven.
+
+## Vesktop (Discord)
+
+Vesktop (the Vencord-based Discord client, package `vesktop-bin`) ignores
+GTK/system theming entirely — it needs its own CSS injection to reskin, same
+category of problem as Chromium above, different mechanism. Vencord exposes
+a single `quickCss.css` file (`~/.config/vesktop/settings/quickCss.css`)
+that supports `@import url(...)` and hot-reloads live on save, no app
+restart needed — this is the same mechanism pywal/wallust Discord
+integrations use (e.g. `ZephyrCodesStuff/pywal-vencord`,
+`guglicap/wal-discord`).
+
+`templates/discord-quickcss.css.tmpl` `@import`s a published BetterDiscord
+recolor theme
+([DiscordRecolor](https://github.com/mwittrien/BetterDiscordAddons/tree/master/Themes/DiscordRecolor))
+that exposes the whole UI as CSS custom properties, then overrides those
+properties from this preset's palette. Rendered output is
+`vesktop/quickcss.css` (tracked in this repo), symlinked by `setup.sh` to
+the live `~/.config/vesktop/settings/quickCss.css` path — only that one file
+is symlinked; the rest of `~/.config/vesktop/settings/` (`settings.json`,
+caches, session data) is live Vencord state this repo doesn't own.
+
+`apply-theme.py`'s `ensure_vesktop_quickcss_enabled()` also patches
+`settings.json`'s `useQuickCss` key back to `true` on every preset switch —
+Vencord's own toggle for whether it reads `quickCss.css` at all, which lives
+in that same live-state file outside this repo's control, so a preset
+switch alone can't guarantee it stays on (e.g. after a fresh Vesktop install
+or a toggle flipped off by hand).

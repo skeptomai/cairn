@@ -96,13 +96,20 @@ ttf-jetbrains-mono-nerd
 ttf-cascadia-mono-nerd
 ttf-cascadia-code-nerd
 fastfetch
-# chromium: tracked here specifically (unlike firefox/discord/etc., which
-# are deliberately NOT tracked -- personal app choices, see the note near
+# chromium: tracked here specifically (unlike firefox/etc., which are
+# deliberately NOT tracked -- personal app choices, see the note near
 # the bottom of this file) because theming/apply-theme.py retints
 # its toolbar/tab color on every theme switch via Chromium's managed
 # enterprise-policy mechanism (--refresh-platform-policy, upstream since
 # Chrome ~142 -- the plain official package works, no fork/AUR needed).
 chromium
+# vesktop-bin: same reasoning as chromium above -- tracked specifically
+# because apply-theme.py retints it (Vesktop/Vencord's quickCss.css, see
+# vesktop/quickcss.css + theming/templates/discord-quickcss.css.tmpl), not
+# because Discord itself is otherwise a tracked app choice. Prebuilt,
+# straight from the official cachyos repo (no AUR helper needed) --
+# confirmed via `pacman -Si vesktop-bin`, provides `vesktop`/`vencord-desktop`.
+vesktop-bin
 # imagemagick: generates the color-swatch preview PNGs for the walker/
 # elephant theme picker (theming/generate-previews.py). Not otherwise
 # a hard dependency of the theming system itself.

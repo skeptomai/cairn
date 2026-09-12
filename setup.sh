@@ -60,6 +60,10 @@ link btop btop
 link mimeapps.list mimeapps.list
 link chromium-flags.conf chromium-flags.conf
 link elephant/menus elephant/menus
+# Only quickcss.css is symlinked -- the rest of ~/.config/vesktop/settings/
+# (settings.json, session data, caches) is live Vesktop/Vencord state, not
+# something this repo should own or overwrite.
+link vesktop/quickcss.css vesktop/settings/quickCss.css
 
 # nvim-ghostty.desktop: default text/plain handler (ghostty -e nvim), and
 # thunar/nvim-ghostty as the mimeapps.list defaults for inode/directory and
