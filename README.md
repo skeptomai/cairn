@@ -88,6 +88,24 @@ TOML per preset (`gray-blue`, `gruvbox`, `nord`, `catppuccin-mocha`,
 kdeglobals by `theming/apply-theme.py`. See `theming/README.md` for the
 palette schema and how to add a new preset or app.
 
+### Desktop wallpaper vs. greeter wallpaper — two separate pickers
+
+These are deliberately independent, not the same picture in two places:
+
+- **`Super+Shift+W`** — desktop wallpaper, scoped to the *current theme's own*
+  `theming/palettes/<preset>/backgrounds/` folder. `apply-theme.py` already
+  auto-sets this to `backgrounds/1-*` on every theme switch; this binding
+  just lets you pick a different alternate from that same set by hand.
+- **`Super+Shift+G`** — the greetd login screen's wallpaper, browsing
+  `/usr/share/wallpapers/cachyos-wallpapers` (a general system wallpaper
+  pack, not theme-scoped — the greeter isn't re-themed on every switch the
+  way the desktop is). Picking one runs `bin/set-greeter-wallpaper` (wired
+  as waypaper's `post_command`, see `waypaper/greeter-config.ini`), which
+  installs it to `/etc/greetd/wallpaper.<ext>` and rewrites
+  `regreet.toml`'s `path =` line to match. `bootstrap.sh` only seeds a
+  tracked default (`greetd/wallpaper.jpg`) if nothing's been picked yet —
+  it won't overwrite a wallpaper you've already set this way.
+
 ## Screensaver
 
 `screensaver/` animates `screensaver/cairn.txt` (an ASCII "CAIRN" banner)
@@ -187,10 +205,12 @@ fixed).
    on 2026-09-05.
 3. Installs `/etc/greetd/config.toml` (rendered from `greetd/config.toml.tmpl`
    using `localectl`'s currently-configured layout — whatever you picked in
-   the CachyOS installer, not a hardcoded default), `/etc/greetd/regreet.toml`,
-   and `/etc/greetd/wallpaper.jpg` (one of the `stone-creature` theme's own
-   background photos), and writes the same layout to
-   `~/.config/sway/local.conf.d/10-keyboard.conf`
+   the CachyOS installer, not a hardcoded default) and `/etc/greetd/regreet.toml`
+   (rendered from `greetd/regreet.toml.tmpl`, pointing at whatever greeter
+   wallpaper already exists, or the tracked default —
+   `greetd/wallpaper.jpg` — on a fresh install with nothing picked yet; see
+   "Desktop wallpaper vs. greeter wallpaper" above), and writes the same
+   keyboard layout to `~/.config/sway/local.conf.d/10-keyboard.conf`
    so the real session matches. These have to agree, or correctly-typed
    passwords look like login failures — the greeter and your real session
    are separate processes reading separate layout config. Enables
@@ -251,8 +271,10 @@ cairn/
 ├── uwsm/                       # -> symlinked to ~/.config/uwsm (SWAY_UNSUPPORTED_GPU env var)
 ├── wayland-sessions/            # sway-uwsm.desktop (root-owned at runtime,
 │                                 #   installed by bootstrap.sh, not symlinked)
-└── greetd/                     # config.toml, regreet.toml, wallpaper.jpg (root-owned
-                                 #   at runtime, installed by bootstrap.sh, not symlinked)
+├── bin/                         # set-greeter-wallpaper, symlinked to ~/.local/bin
+├── waypaper/                    # greeter-config.ini for the Super+Shift+G picker
+└── greetd/                     # config.toml.tmpl, regreet.toml.tmpl, wallpaper.jpg
+                                 #   (rendered/installed to /etc by bootstrap.sh, not symlinked)
 ```
 
 Note: `swayosd` and `yazi` are in `packages.txt` but have no tracked config

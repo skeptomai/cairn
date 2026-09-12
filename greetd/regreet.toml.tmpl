@@ -1,5 +1,8 @@
 [background]
-path = "/etc/greetd/wallpaper.jpg"
+# Filled in by bootstrap.sh: whatever /etc/greetd/wallpaper.* already exists
+# (set via Super+Shift+G -> set-greeter-wallpaper) is preserved; only a truly
+# fresh install with nothing there yet falls back to the tracked default.
+path = "{{WALLPAPER_PATH}}"
 fit = "Cover"
 
 [GTK]

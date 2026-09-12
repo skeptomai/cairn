@@ -58,6 +58,7 @@ link kdeglobals-file kdeglobals
 link uwsm uwsm
 link btop btop
 link mimeapps.list mimeapps.list
+link waypaper/greeter-config.ini waypaper/greeter-config.ini
 link chromium-flags.conf chromium-flags.conf
 link elephant/menus elephant/menus
 # Only quickcss.css is symlinked -- the rest of ~/.config/vesktop/settings/
@@ -82,6 +83,20 @@ else
   echo -e "${GREEN}LINKED  $APPLICATIONS_DIR/nvim-ghostty.desktop${NC}"
 fi
 update-desktop-database "$APPLICATIONS_DIR" 2>/dev/null || true
+
+# set-greeter-wallpaper: pushes whatever wallpaper you pick via waypaper
+# (Super+Shift+G, see sway/config) into /etc/greetd/wallpaper.* + regreet.toml.
+# Was private, untracked tooling under ~/.local/bin -- moved in here 2026-09-12
+# so a fresh install doesn't silently lack it. ~/.local/bin isn't under
+# $CONFIG_DIR, so this needs its own block rather than the link() helper.
+LOCAL_BIN_DIR="$HOME/.local/bin"
+mkdir -p "$LOCAL_BIN_DIR"
+if [ -L "$LOCAL_BIN_DIR/set-greeter-wallpaper" ] && [ "$(readlink -f "$LOCAL_BIN_DIR/set-greeter-wallpaper")" = "$(realpath "$SCRIPT_DIR/bin/set-greeter-wallpaper")" ]; then
+  echo "OK      $LOCAL_BIN_DIR/set-greeter-wallpaper"
+else
+  ln -sfn "$(realpath "$SCRIPT_DIR/bin/set-greeter-wallpaper")" "$LOCAL_BIN_DIR/set-greeter-wallpaper"
+  echo -e "${GREEN}LINKED  $LOCAL_BIN_DIR/set-greeter-wallpaper${NC}"
+fi
 
 # elephant.service: walker 2.x's actual search backend daemon (see
 # elephant-bin/elephant-desktopapplications-bin in bootstrap.sh's

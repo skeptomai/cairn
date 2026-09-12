@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Push a wallpaper image into the regreet login screen.
+# Usage: set-greeter-wallpaper /path/to/image.png
+#
+# Wired as waypaper's post_command (see ~/.config/waypaper/config.ini),
+# so every wallpaper pick in waypaper's browser also updates the greeter.
+set -euo pipefail
+
+SRC="${1:?usage: set-greeter-wallpaper <image path>}"
+[ -f "$SRC" ] || { echo "set-greeter-wallpaper: no such file: $SRC" >&2; exit 1; }
+
+EXT="${SRC##*.}"
+DEST="/etc/greetd/wallpaper.${EXT}"
+
+sudo install -m 644 "$SRC" "$DEST"
+
+# Drop any stale wallpaper.* with a different extension from a previous run.
+for f in /etc/greetd/wallpaper.*; do
+    [ "$f" = "$DEST" ] || sudo rm -f "$f"
+done
+
+sudo python3 - "$DEST" <<'PY'
+import re, sys
+dest = sys.argv[1]
+path = "/etc/greetd/regreet.toml"
+text = open(path).read()
+text = re.sub(r'path = ".*"', f'path = "{dest}"', text)
+open(path, "w").write(text)
+PY
+
+echo "set-greeter-wallpaper: greeter background updated to $SRC"

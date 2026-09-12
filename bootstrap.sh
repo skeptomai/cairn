@@ -269,14 +269,26 @@ XKB_ENV="XKB_DEFAULT_LAYOUT=$XKB_LAYOUT"
 
 echo "==> Installing greetd config (keyboard layout matched to the session below)"
 sed "s#{{XKB_ENV}}#$XKB_ENV#" greetd/config.toml.tmpl | sudo tee /etc/greetd/config.toml >/dev/null
-sudo install -m 644 greetd/regreet.toml /etc/greetd/regreet.toml
-# One of the user's own stone-creature theme photos (see theming/palettes/
-# stone-creature/backgrounds/5-goyle5.jpg) -- tracked here like every other
-# theme background, so a fresh install gets a real greeter wallpaper with no
-# manual step. An earlier version of this file was a 24MB uncompressed PNG
-# copied in by hand and deliberately left untracked; this one is a properly
-# sized JPEG (~950KB), in line with every other tracked wallpaper.
-sudo install -m 644 greetd/wallpaper.jpg /etc/greetd/wallpaper.jpg
+
+# The greeter wallpaper's real owner is bin/set-greeter-wallpaper (wired to
+# Super+Shift+G via waypaper, see sway/config) -- it installs
+# /etc/greetd/wallpaper.<ext> and rewrites regreet.toml's path to match
+# whenever you pick a new one. Don't stomp that here: if a wallpaper already
+# exists (i.e. you've picked one), preserve it; only a truly fresh install
+# with nothing there yet gets the tracked default (one of the user's own
+# stone-creature theme photos, greetd/wallpaper.jpg -- a properly sized
+# ~950KB JPEG, not the 24MB uncompressed PNG an earlier version of this file
+# assumed and deliberately left untracked).
+EXISTING_WALLPAPER="$(compgen -G '/etc/greetd/wallpaper.*' || true)"
+if [ -n "$EXISTING_WALLPAPER" ]; then
+  echo "    preserving existing greeter wallpaper: $EXISTING_WALLPAPER"
+  WALLPAPER_PATH="$EXISTING_WALLPAPER"
+else
+  echo "    no greeter wallpaper set yet -- installing the tracked default"
+  sudo install -m 644 greetd/wallpaper.jpg /etc/greetd/wallpaper.jpg
+  WALLPAPER_PATH="/etc/greetd/wallpaper.jpg"
+fi
+sed "s#{{WALLPAPER_PATH}}#$WALLPAPER_PATH#" greetd/regreet.toml.tmpl | sudo tee /etc/greetd/regreet.toml >/dev/null
 
 echo "==> Writing matching sway keyboard layout to sway/local.conf.d/ (not tracked in git -- see sway/config's tail)"
 # Written into the repo checkout itself (not $HOME/.config/sway/local.conf.d)
