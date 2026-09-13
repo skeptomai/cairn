@@ -104,7 +104,7 @@ bindsym $mod+shift+d exec rofi -show drun
 bindsym $mod+Shift+q reload
 bindsym $mod+Shift+e exec wlogout
 bindsym $mod+e exec thunar
-bindsym $mod+w exec firefox
+bindsym $mod+w exec chromium
 # Browses the *active* theme preset's own backgrounds/ folder (set by
 # apply-theme.py's apply_wallpaper(), which always defaults to 1-*) so this
 # key lets you flip between that preset's alternates instead of a generic
