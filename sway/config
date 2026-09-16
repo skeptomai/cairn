@@ -100,7 +100,7 @@ bindsym $mod+Return exec $term
 bindsym $mod+q kill
 bindsym $mod+d exec $menu
 bindsym $mod+space exec $menu
-bindsym $mod+shift+d exec rofi -show drun
+bindsym $mod+shift+d exec vesktop
 bindsym $mod+Shift+q reload
 bindsym $mod+Shift+e exec wlogout
 bindsym $mod+e exec thunar
