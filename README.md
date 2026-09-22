@@ -88,6 +88,22 @@ TOML per preset (`gray-blue`, `gruvbox`, `nord`, `catppuccin-mocha`,
 kdeglobals by `theming/apply-theme.py`. See `theming/README.md` for the
 palette schema and how to add a new preset or app.
 
+**Switching preset**: **`Super+Ctrl+Shift+Space`** opens a walker menu
+listing the presets (`walker -m menus:cachyosthemes`, backed by
+`elephant/menus/cachyos_themes.lua`) and runs `apply-theme.py` on your
+pick. This depends on two systemd user services `setup.sh` installs and
+restarts on every run — `elephant.service` (walker 2.x's search backend;
+without it walker just shows "Waiting for elephant..." forever) and
+`walker.service` itself (its old plain-`exec` launch in `sway/config` had
+no restart-on-crash and would silently die). Both get an explicit
+`restart`, not just `enable`, because elephant only scans `menus/*.lua`
+once at startup and never hot-reloads — a newly added preset/menu entry
+needs that restart to be picked up at all, and if elephant restarts while
+walker's still holding its old connection, walker needs a restart too or
+it keeps talking to the dead process. If the theme-picker menu ever comes
+up empty with no error, this daemon chain is the first thing to check
+(`systemctl --user status elephant walker`), not the menu file itself.
+
 ### Desktop wallpaper vs. greeter wallpaper — two separate pickers
 
 These are deliberately independent, not the same picture in two places:
@@ -105,6 +121,59 @@ These are deliberately independent, not the same picture in two places:
   `regreet.toml`'s `path =` line to match. `bootstrap.sh` only seeds a
   tracked default (`greetd/wallpaper.jpg`) if nothing's been picked yet —
   it won't overwrite a wallpaper you've already set this way.
+
+## Keybindings
+
+`$mod` is Super. Full list from `sway/config`, grouped by what they do —
+see the linked sections above/below for the *why* behind the non-obvious
+ones.
+
+**Theming/wallpaper** (see [Theming](#theming) above):
+| Binding | Action |
+|---|---|
+| `Super+Ctrl+Shift+Space` | Theme preset picker (walker) |
+| `Super+Shift+W` | Desktop wallpaper picker, current theme's own set |
+| `Super+Shift+G` | Greeter wallpaper picker |
+
+**Lock/screensaver** (see [Lock screen](#lock-screen) /
+[Screensaver](#screensaver) below):
+| Binding | Action |
+|---|---|
+| `Super+L` | Screensaver, then hands off into the real lock on dismiss |
+| `Super+Shift+L` | Screensaver only, no lock |
+
+**Apps/launchers**:
+| Binding | Action |
+|---|---|
+| `Super+Return` | Terminal (`$term`) |
+| `Super+D` / `Super+Space` | App launcher (`$menu`, walker) |
+| `Super+Shift+D` | Vesktop |
+| `Super+E` | Thunar (file manager) |
+| `Super+W` | Chromium |
+| `Super+Shift+E` | `wlogout` power menu |
+| `Print` | Screenshot, full screen, to `~/Pictures/` |
+| `Super+Print` | Screenshot, region select (`slurp`), to `~/Pictures/` |
+| `Super+Shift+V` | Clipboard history (`cliphist` + `rofi`) |
+
+**Window/layout management**:
+| Binding | Action |
+|---|---|
+| `Super+Q` | Kill focused window |
+| `Super+Shift+Q` | Reload sway config |
+| `Super+←/↓/↑/→` | Focus direction |
+| `Super+Shift+←/↓/↑/→` | Move container direction |
+| `Super+B` / `Super+V` | Split horizontal / vertical |
+| `Super+F` | Fullscreen toggle |
+| `Super+Shift+Space` | Floating toggle |
+| `Super+S` / `Super+T` | Layout stacking / tabbed |
+| `Super+Shift+T` | Toggle split layout |
+| `Super+A` | Focus parent |
+| `Super+R` | Resize mode (arrow keys resize, `Return`/`Escape` exit) |
+| `Super+1`–`0` | Switch to workspace 1–10 |
+| `Super+Shift+1`–`0` | Move focused container to workspace 1–10 |
+
+**Media/hardware keys**: standard `XF86Audio*`/`XF86MonBrightness*` keys
+via `swayosd-client`, plus `XF86AudioPlay/Next/Prev` via `playerctl`.
 
 ## Screensaver
 
@@ -268,6 +337,12 @@ cairn/
 ├── gtk-3.0/, Kvantum/          # GTK3 + Qt theming
 ├── kdeglobals-file              # -> symlinked to ~/.config/kdeglobals
 ├── fastfetch/                   # includes several logo/*.icon assets
+├── elephant/menus/               # walker 2.x search-backend provider .lua files
+│                                 #   (cachyos_themes.lua backs the Super+Ctrl+Shift+Space picker)
+├── vesktop/quickcss.css          # -> ~/.config/vesktop/settings/quickCss.css only;
+│                                 #   rest of vesktop/settings/ is live app state, untracked
+├── applications/nvim-ghostty.desktop  # default text/plain + Ghostty "Open Config" handler,
+│                                 #   -> ~/.local/share/applications/
 ├── uwsm/                       # -> symlinked to ~/.config/uwsm (SWAY_UNSUPPORTED_GPU env var)
 ├── wayland-sessions/            # sway-uwsm.desktop (root-owned at runtime,
 │                                 #   installed by bootstrap.sh, not symlinked)

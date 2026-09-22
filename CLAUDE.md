@@ -79,6 +79,19 @@ mkinitcpio, limine cmdline, root-owned `/etc/greetd/*`) live in
   until `sudo faillock --user <you> --reset` clears it. Confirmed fixed via
   a live `$mod+l` test the same day: rustlock started, accepted the real
   password, exited cleanly.
+- **`elephant.service` and `walker.service` get `restart`, not just
+  `enable`, on every `setup.sh` run** — don't "simplify" this to
+  `enable --now` (a no-op if already active). `elephant` (walker 2.x's
+  search backend) only scans its providers, including
+  `elephant/menus/*.lua`, once at startup and never hot-reloads, so a
+  newly added preset/menu silently doesn't show up in the
+  `Super+Ctrl+Shift+Space` theme picker without a restart. And `walker`
+  holds its own connection to `elephant` from its own startup, so
+  restarting `elephant` without also restarting `walker` leaves it talking
+  to the dead process. Symptom in both cases looks identical: the
+  theme-picker menu opens empty with no error. Both services previously
+  ran as plain `exec`/manual-enable with no restart-on-crash, which is why
+  this was hard to track down — found 2026-09-06/2026-09-07 on the VM.
 
 ## Metadata
 
