@@ -124,9 +124,18 @@ These are deliberately independent, not the same picture in two places:
 
 ## Keybindings
 
-`$mod` is Super. Full list from `sway/config`, grouped by what they do —
-see the linked sections above/below for the *why* behind the non-obvious
-ones.
+**Forgot a binding? Press `Super+K`** — opens a searchable walker menu
+generated live from `sway/config` by `bin/show-keybindings` (so it can't
+drift from the real bindings; `bin/show-keybindings --print` dumps it to a
+terminal). To give a binding a nicer description than the auto-derived one,
+put a `#: description` comment on the line above its `bindsym`.
+
+`$mod` is Super. The table below is the hand-grouped version of the same
+list — see the linked sections for the *why* behind the non-obvious ones.
+
+| Binding | Action |
+|---|---|
+| `Super+K` | Show keybindings (walker) |
 
 **Theming/wallpaper** (see [Theming](#theming) above):
 | Binding | Action |

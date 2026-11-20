@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+"""Show sway keybindings in a searchable walker menu (Omarchy's Super+K).
+
+Generated live from sway/config, so it can't drift from the real bindings.
+A `#: description` comment on the line(s) above a bindsym overrides the
+auto-derived description. Selecting an entry runs it. Pass --print to dump the table to stdout instead.
+"""
+import os, re, subprocess, sys
+
+cfg = os.path.join(os.path.dirname(os.path.realpath(os.path.expanduser("~/.config/sway"))), "sway", "config") \
+    if not os.path.exists(os.path.expanduser("~/.config/sway/config")) else os.path.expanduser("~/.config/sway/config")
+
+KEYS = {"Mod4": "Super", "Return": "Enter", "space": "Space", "Left": "←", "Right": "→", "Up": "↑", "Down": "↓",
+        "ctrl": "Ctrl", "shift": "Shift", "Print": "PrtSc", "Escape": "Esc"}
+VERBS = [  # (regex on command, description)
+    (r"^kill", "Close window"), (r"^reload", "Reload sway config"), (r"^exec \$term", "Terminal"),
+    (r"^exec \$menu", "App launcher"), (r"^exec walker -m menus:cachyosthemes", "Theme picker"),
+    (r"^exec (\S*/)?(\w[\w-]*)", None), (r"^workspace number", None), (r"^move container to workspace number", None),
+    (r"^focus (\w+)", None), (r"^move (\w+)$", None), (r"^layout", None), (r"^fullscreen", "Fullscreen toggle"),
+    (r"^floating toggle", "Floating toggle"), (r"^split(h|v)", None), (r"^mode", None),
+]
+
+def pretty_key(k, variables):
+    parts = [variables.get(p, p) for p in k.split("+")]
+    parts = [KEYS.get(p, KEYS.get(p.capitalize(), p)) if p not in variables.values() else p for p in parts]
+    out = []
+    for p in parts:
+        p = {"Mod4": "Super"}.get(p, p)
+        out.append(p if len(p) > 1 else p.upper())
+    order = {"Super": 0, "Ctrl": 1, "Alt": 2, "Shift": 3}
+    out.sort(key=lambda p: order.get(p, 9))
+    return " + ".join(out)
+
+def describe(cmd):
+    m = re.match(r"workspace number \$ws(\d+)", cmd)
+    if m: return f"Go to workspace {m[1]}"
+    m = re.match(r"move container to workspace number \$ws(\d+)", cmd)
+    if m: return f"Move window to workspace {m[1]}"
+    m = re.match(r"(focus|move) (left|right|up|down)$", cmd)
+    if m: return f"{m[1].capitalize()} {m[2]}"
+    m = re.match(r"layout (.+)", cmd)
+    if m: return f"Layout: {m[1]}"
+    m = re.match(r"split(h|v)", cmd)
+    if m: return "Split " + ("horizontal" if m[1] == "h" else "vertical")
+    if cmd == "focus parent": return "Focus parent container"
+    m = re.match(r"mode \"(\w+)\"", cmd)
+    if m: return f"{m[1].capitalize()} mode"
+    if re.match(r"(focus|move) (left|right|up|down)$", cmd): return cmd.capitalize()
+    for rx, d in VERBS:
+        if d and re.match(rx, cmd): return d
+    m = re.match(r"exec (?:swayosd-client --(\w+)-(\w+) (\w[\w-]*)|playerctl (.+)|(\S+))", cmd)
+    if m:
+        if m[1]: return f"{m[1].capitalize()} {m[2]}: {m[3]}"
+        if m[4]: return f"Media: {m[4]}"
+        return f"Run {os.path.basename(m[5])}"
+    return cmd
+
+def parse():
+    variables, rows, note, mode = {}, [], None, "default"
+    for line in open(cfg):
+        s = line.strip()
+        if s.startswith("#:"): note = s[2:].strip(); continue
+        m = re.match(r"set (\$\w+) (.+)", s)
+        if m: variables[m[1]] = m[2]; continue
+        m = re.match(r'mode "(\w+)" \{', s)
+        if m: mode = m[1]; continue
+        if s == "}" : mode = "default"; continue
+        m = re.match(r"bindsym (?:--\S+ )*(\S+)\s+(.+)", s)
+        if m:
+            if mode != "default": note = None; continue  # sub-mode keys are listed via the mode's own entry
+            rows.append((pretty_key(m[1], variables), note or describe(m[2]), m[2]))
+            note = None
+        elif s and not s.startswith("#"): note = None
+    # swaymsg doesn't know the config's `set` variables, so expand them
+    # (longest first, so $ws10 isn't clobbered by $ws1).
+    def expand(c):
+        for v in sorted(variables, key=len, reverse=True):
+            c = c.replace(v, variables[v])
+        return c
+    return [(k, d, expand(c)) for k, d, c in rows]
+
+rows = parse()
+lines = [f"{k}  —  {d}" for k, d, _ in rows]
+if "--print" in sys.argv:
+    print("\n".join(lines)); sys.exit()
+r = subprocess.run(["walker", "--dmenu", "--width", "700", "--height", "600", "-p", "Keybindings"],
+                   input="\n".join(lines), text=True, capture_output=True)
+choice = r.stdout.strip()
+for line, (_, _, cmd) in zip(lines, rows):
+    if line == choice:
+        # run it exactly as the binding would (after the menu has closed)
+        subprocess.run(["swaymsg", cmd])
+        break

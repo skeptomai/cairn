@@ -56,9 +56,11 @@ exec_always pkill -x swayidle; swayidle -w \
     before-sleep 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/lockscreen/lock.sh'
 # Screensaver plays first; dismissing it (any keypress) hands off directly
 # into the real lock -- see screensaver/launch-screensaver.sh's --lock-on-exit.
+#: Screensaver, then lock on dismiss
 bindsym $mod+l exec 'pkill -f "[r]un-screensaver.sh" 2>/dev/null; pkill -x ttfx 2>/dev/null; $HOME/.local/share/cairn-repo/screensaver/launch-screensaver.sh --lock-on-exit'
 # On-demand screensaver trigger (no swayidle timeout, just the same launch
 # script the 150s idle stage calls) -- for previewing it without waiting.
+#: Screensaver only (no lock)
 bindsym $mod+Shift+l exec $HOME/.local/share/cairn-repo/screensaver/launch-screensaver.sh
 # Lock immediately on lid close, not just before-sleep -- suspend can lag
 # behind the physical lid switch (inhibitors, systemd-logind delay), during
@@ -100,10 +102,14 @@ bindsym $mod+Return exec $term
 bindsym $mod+q kill
 bindsym $mod+d exec $menu
 bindsym $mod+space exec $menu
+#: Discord (Vesktop)
 bindsym $mod+shift+d exec vesktop
 bindsym $mod+Shift+q reload
+#: Power menu
 bindsym $mod+Shift+e exec wlogout
+#: File manager
 bindsym $mod+e exec thunar
+#: Browser
 bindsym $mod+w exec chromium
 # Browses the *active* theme preset's own backgrounds/ folder (set by
 # apply-theme.py's apply_wallpaper(), which always defaults to 1-*) so this
@@ -111,9 +117,13 @@ bindsym $mod+w exec chromium
 # system wallpaper set. Resolves the repo root via the ~/.config/sway
 # symlink rather than a hardcoded path, since setup.sh symlinks this whole
 # directory in from wherever the repo happens to be checked out.
+#: Wallpaper picker (current theme)
 bindsym $mod+Shift+w exec sh -c 'root="$(dirname "$(realpath "$HOME/.config/sway")")"; waypaper --backend swaybg --folder "$root/theming/palettes/$(cat "$root/theming/.current-preset")/backgrounds"'
+#: Greeter wallpaper picker
 bindsym $mod+Shift+g exec waypaper --config-file ~/.config/waypaper/greeter-config.ini --state-file ~/.local/state/waypaper/greeter-state.ini --backend none
 bindsym $mod+ctrl+shift+space exec walker -m menus:cachyosthemes
+#: Show this keybinding list (generated from this file)
+bindsym $mod+k exec $HOME/.local/share/cairn-repo/bin/show-keybindings
 
 ### Focus
 bindsym $mod+Left  focus left
@@ -194,8 +204,11 @@ for_window [app_id="com.mitchellh.ghostty" title="run-screensaver"] fullscreen e
 ### Screenshots / clipboard
 bindsym Print exec grim ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png
 bindsym $mod+Print exec grim -g "$(slurp)" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png
+#: Screenshot (full screen)
 bindsym $mod+shift+v exec cliphist list | rofi -dmenu | cliphist decode | wl-copy
+#: Screenshot (select region)
 
+#: Clipboard history
 ### Media / hardware keys
 bindsym XF86AudioRaiseVolume exec swayosd-client --output-volume raise
 bindsym XF86AudioLowerVolume exec swayosd-client --output-volume lower
@@ -203,7 +216,9 @@ bindsym XF86AudioMute exec swayosd-client --output-volume mute-toggle
 bindsym XF86AudioMicMute exec swayosd-client --input-volume mute-toggle
 bindsym XF86MonBrightnessUp exec swayosd-client --brightness raise
 bindsym XF86MonBrightnessDown exec swayosd-client --brightness lower
+#: Brightness up
 bindsym XF86AudioPlay exec playerctl play-pause
+#: Brightness down
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
