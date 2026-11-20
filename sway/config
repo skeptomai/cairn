@@ -193,6 +193,8 @@ mode "resize" {
 bindsym $mod+r mode "resize"
 
 ### Window rules
+for_window [app_id="vesktop"] move container to workspace number $ws5, workspace number $ws5
+for_window [app_id="emacs"] move container to workspace number $ws8, workspace number $ws8
 for_window [app_id="com.mitchellh.ghostty" title="btop"] floating enable, resize set 900 650, move position center
 for_window [app_id="blueman-manager"] floating enable, resize set 700 500, move position center
 for_window [app_id="waypaper"] floating enable, resize set 1000 700, move position center
@@ -202,23 +204,23 @@ for_window [app_id="waypaper"] floating enable, resize set 1000 700, move positi
 for_window [app_id="com.mitchellh.ghostty" title="run-screensaver"] fullscreen enable, border none
 
 ### Screenshots / clipboard
-bindsym Print exec grim ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png
-bindsym $mod+Print exec grim -g "$(slurp)" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png
 #: Screenshot (full screen)
-bindsym $mod+shift+v exec cliphist list | rofi -dmenu | cliphist decode | wl-copy
+bindsym Print exec grim ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png
 #: Screenshot (select region)
-
+bindsym $mod+Print exec grim -g "$(slurp)" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png
 #: Clipboard history
+bindsym $mod+shift+v exec cliphist list | rofi -dmenu | cliphist decode | wl-copy
+
 ### Media / hardware keys
 bindsym XF86AudioRaiseVolume exec swayosd-client --output-volume raise
 bindsym XF86AudioLowerVolume exec swayosd-client --output-volume lower
 bindsym XF86AudioMute exec swayosd-client --output-volume mute-toggle
 bindsym XF86AudioMicMute exec swayosd-client --input-volume mute-toggle
-bindsym XF86MonBrightnessUp exec swayosd-client --brightness raise
-bindsym XF86MonBrightnessDown exec swayosd-client --brightness lower
 #: Brightness up
-bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86MonBrightnessUp exec swayosd-client --brightness raise
 #: Brightness down
+bindsym XF86MonBrightnessDown exec swayosd-client --brightness lower
+bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
