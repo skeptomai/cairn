@@ -194,6 +194,16 @@ if ! grep -q '^HOOKS=.*resume' /etc/mkinitcpio.conf; then
   sudo mkinitcpio -P
 fi
 
+# Early KMS (the 'kms' hook) breaks cold hibernate resume on omen's Intel iGPU: the boot
+# kernel initialises the GPU in the initramfs, then restores the old kernel over it, and
+# the machine comes back black. Removing it fixed it (2026-11-21, see
+# docs/hibernate-resume-debug-plan.md test 4b). Not tested with the NVIDIA dGPU enabled.
+if grep -q '^HOOKS=.* kms ' /etc/mkinitcpio.conf; then
+  echo "    removing 'kms' hook from mkinitcpio.conf (breaks cold hibernate resume)"
+  sudo sed -i '/^HOOKS=/s/ kms / /' /etc/mkinitcpio.conf
+  sudo mkinitcpio -P
+fi
+
 if ! grep -q "resume=UUID=${ROOT_UUID}" /etc/default/limine; then
   echo "    adding resume= / resume_offset= to limine kernel cmdline"
   sudo sed -i "s|\(KERNEL_CMDLINE\[default\]+=\"[^\"]*\)\"|\1 resume=UUID=${ROOT_UUID} resume_offset=${RESUME_OFFSET}\"|" /etc/default/limine

@@ -63,6 +63,11 @@ if still needed on whatever kernel version a reinstall lands on.
 
 ## mkinitcpio: the GPU/hibernate interaction (missing from [[hybrid-gpu-intel-nvidia]])
 
+> **2026-11-21 note:** omen's NVIDIA dGPU is now disabled in BIOS, so the
+> NVIDIA-specific parts of this section are inert on that machine (and
+> `bootstrap.sh` skips them when `lspci` shows no NVIDIA device). They still
+> apply to any install with the dGPU enabled.
+
 The NVIDIA DRM modules must be **excluded from early KMS** (not loaded in the
 initramfs) specifically because loading them that early conflicts with
 `NVreg_PreserveVideoMemoryAllocations=1` (see [[hybrid-gpu-intel-nvidia]])
@@ -110,6 +115,12 @@ Installed automatically by `bootstrap.sh`, alongside the modprobe.d
 `nvidia-hibernate.service`/`nvidia-suspend.service`/`nvidia-resume.service`.
 Verify with `sudo lsinitcpio /boot/<...>/initramfs | grep nvidia.*\.ko` —
 should show nothing.
+
+> **2026-11-21 experiment, see `docs/hibernate-resume-debug-plan.md` test 4b:** the
+> `kms` hook itself (not just nvidia in it) is being removed on omen to test whether
+> early Intel iGPU init in the initramfs breaks cold resume. There is no recorded reason
+> it was there; it's the stock CachyOS HOOKS default. The `kms` mentions below describe
+> the pre-experiment state. Outcome pending.
 
 `resume` hook must come after `encrypt`/`block`/`filesystems` in `HOOKS` (as
 in the Omarchy example above) — order matters for mkinitcpio hooks in

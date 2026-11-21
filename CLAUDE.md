@@ -41,6 +41,22 @@ mkinitcpio, limine cmdline, root-owned `/etc/greetd/*`) live in
   writeup: `docs/hibernate-swap-luks.md`. All three pieces are in
   `bootstrap.sh`. Regressed 2026-09-06 after the 2026-09-05 verification,
   once the dGPU was actively bound — hadn't hit the chwd interaction before.
+- **The mkinitcpio `kms` hook must NOT be in `HOOKS`** (fixed 2026-11-21). With
+  the Intel iGPU, early KMS made cold hibernate resume fail: power-on, black
+  display, dead input, no journal, and the image was consumed. Removing `kms`
+  restored it on the first retest. `kms` was only the stock CachyOS default, never a
+  deliberate choice. `bootstrap.sh` strips it. Don't re-add it. Diagnosis in
+  `docs/hibernate-resume-debug-plan.md`. Untested with the dGPU enabled.
+- **As of 2026-11-21 the NVIDIA dGPU on omen is disabled in BIOS** (battery
+  savings), so `lspci` shows only the Intel Arrow Lake iGPU and
+  `bootstrap.sh`'s NVIDIA block would skip itself on a fresh install. The
+  NVIDIA hibernate pieces above are still installed on omen but inert there.
+  The hibernate fix was verified *with* the dGPU bound; hibernate with it off
+  is being re-tested. Also: the 2026-11-20/21 failures were **s2idle suspend**,
+  not hibernate — the Intel AX211 wifi (iwlwifi) firmware dies during sleep
+  (`device is gone during suspend`, `Failed to start RT ucode: -110`) and only
+  a reboot recovers it; keyboard/display freeze on resume is not yet
+  explained. Suspend has never been debugged in this repo.
 - **Greetd's keyboard layout must match the real sway session's layout
   exactly** — a real, previously-confusing bug (correct passwords looking
   like failed logins because the greeter and the real session were reading
