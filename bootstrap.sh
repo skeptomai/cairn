@@ -210,6 +210,15 @@ if ! grep -q "resume=UUID=${ROOT_UUID}" /etc/default/limine; then
   sudo limine-update
 fi
 
+# HP Omen EC fires ACPI GPE 0x6E ~1/s during s2idle, waking the machine each time and
+# blocking deep idle (slp_s0_residency 0). acpi.ec_no_wakeup=1 fixes it: 99% hw sleep on
+# a lid test, 0 wake loops vs 164 (2026-11-21, docs/suspend-debug-plan.md test 2).
+if ! grep -q 'acpi.ec_no_wakeup=1' /etc/default/limine; then
+  echo "    adding acpi.ec_no_wakeup=1 to limine kernel cmdline (s2idle EC wake loop)"
+  sudo sed -i 's|\(KERNEL_CMDLINE\[default\]+="[^"]*\)"|\1 acpi.ec_no_wakeup=1"|' /etc/default/limine
+  sudo limine-update
+fi
+
 cat <<'EOF'
     NOTE: if resume_offset ever needs recomputing (e.g. after any btrfs
     balance/defrag touched @swap — don't do that on purpose), re-run:
