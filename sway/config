@@ -208,6 +208,8 @@ for_window [app_id="com.mitchellh.ghostty" title="run-screensaver"] fullscreen e
 bindsym Print exec grim ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png
 #: Screenshot (select region)
 bindsym $mod+Print exec grim -g "$(slurp)" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png
+#: Screenshot (select region) to clipboard only, no file saved
+bindsym $mod+shift+s exec sh -c 'region=$(slurp) && grim -g "$region" - | wl-copy'
 #: Clipboard history
 bindsym $mod+shift+v exec cliphist list | rofi -dmenu | cliphist decode | wl-copy
 

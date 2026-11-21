@@ -153,6 +153,12 @@ pipewire-pulse
 # portals (xdg-desktop-portal-wlr) -- various apps silently misbehave without these.
 polkit-gnome
 xdg-desktop-portal-wlr
+# screenshots (Print / Super+Print in sway/config: grim captures, slurp picks a region).
+# Both are only transitive deps of xdg-desktop-portal-wlr today; wl-clipboard (wl-copy)
+# is only pulled in by cliphist. List them explicitly since sway/config uses them directly.
+grim
+slurp
+wl-clipboard
 # clipboard manager + wallpaper picker + auto-mount for removable media
 cliphist
 wl-clip-persist

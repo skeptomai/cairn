@@ -40,6 +40,15 @@ with its result and date as it is run.
 - Whether the wifi firmware death causes the freeze or just coincides with it.
 - Whether S3 resume works at all on this BIOS (the hibernate failure was a firmware-path
   hang, so S3 could hang the same way).
+- Whether cold storage of the laptop contributed to the original overnight freeze (user's
+  theory, 2026-11-21: the laptop had been kept in quite cold conditions). Checked the journal
+  (nothing: no temperature or battery logging beyond boot-time `TZ01 30 C`) and upower's
+  battery history (`/var/lib/upower/history-*-Primary-*.dat`, root-only). On Nov 20 the pack
+  discharged smoothly: 12.57 V at 94% (12:00) to 11.44 V at 58% (14:22, close to the 14:30
+  iwlwifi firmware crash) to 11.31 V at 50% (15:31), with no voltage cliff or sag. So no
+  evidence of cold-induced brownout, but cell temperature is not recorded anywhere, so it is
+  not ruled out. It cannot explain the S3 hang (hit ~30 min after boot on a warm machine).
+  The overnight test (4) on a warm laptop is the discriminating experiment.
 
 ## Tests
 

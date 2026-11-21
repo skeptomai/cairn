@@ -162,6 +162,7 @@ list — see the linked sections for the *why* behind the non-obvious ones.
 | `Super+Shift+E` | `wlogout` power menu |
 | `Print` | Screenshot, full screen, to `~/Pictures/` |
 | `Super+Print` | Screenshot, region select (`slurp`), to `~/Pictures/` |
+| `Super+Shift+S` | Screenshot, region select, to the clipboard only (no file saved) |
 | `Super+Shift+V` | Clipboard history (`cliphist` + `rofi`) |
 
 **Window/layout management**:
