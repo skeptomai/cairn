@@ -53,10 +53,21 @@ mkinitcpio, limine cmdline, root-owned `/etc/greetd/*`) live in
   NVIDIA hibernate pieces above are still installed on omen but inert there.
   The hibernate fix was verified *with* the dGPU bound; hibernate with it off
   is being re-tested. Also: the 2026-11-20/21 failures were **s2idle suspend**,
-  not hibernate — the Intel AX211 wifi (iwlwifi) firmware dies during sleep
+  not hibernate — the Intel AX211 wifi (iwlwifi) firmware died around then
   (`device is gone during suspend`, `Failed to start RT ucode: -110`) and only
-  a reboot recovers it; keyboard/display freeze on resume is not yet
-  explained. Suspend has never been debugged in this repo.
+  a reboot recovered it; the keyboard/display freeze on resume was never
+  explained and has not recurred. See the next entry for the fix.
+- **Suspend: stay on s2idle, with `acpi.ec_no_wakeup=1`** (fixed/verified
+  2026-11-22, `docs/suspend-debug-plan.md`). The HP EC fires ACPI GPE 0x6E ~1/s
+  during s2idle, so the machine re-woke every second and never reached deep idle
+  (`slp_s0_residency` 0, high drain, pulsing power LED). The param
+  fixes it (zero wake loops, ~93% S0ix, C10 residency) and is added to the limine
+  cmdline by `bootstrap.sh`. **Don't switch to S3 (`mem_sleep=deep`):** the BIOS
+  (HP F.03) hangs entering it, forced power-off needed (tested 2026-11-21).
+  Don't mask GPE 0x6E; it is the EC's own event line (lid, battery, hotkeys). Five
+  s2idle cycles up to 9 h 23 min worked cleanly. The original 14.5 h freeze is
+  unexplained (cold storage was a theory, unproven); if it recurs, test 3 in the
+  plan (unload/reload iwlwifi around sleep) is the next step.
 - **Greetd's keyboard layout must match the real sway session's layout
   exactly** — a real, previously-confusing bug (correct passwords looking
   like failed logins because the greeter and the real session were reading

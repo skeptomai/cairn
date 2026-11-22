@@ -98,7 +98,19 @@ Ctrl+Alt+F2 behaviour; whether a forced power-off was needed. Then read
 ### 4. Long-sleep test
 - [ ] Sleep for several hours (overnight) with the lid closed, on whichever configuration
       passed. The original failure only showed up after 14.5 hours.
-- Result:
+- Result (2026-11-22, **PASS**), with `acpi.ec_no_wakeup=1`, five s2idle cycles on one boot, all
+  resumed cleanly (`suspend_stats` 5 success / 0 fail, no hang, display and input back):
+  08:34 to 12:06 (3 h 32), 13:09 to 14:32 (1 h 22), 15:24 to 20:12 (4 h 48), **21:41 to 07:04
+  (9 h 23, the overnight)**. Total sleep about 69,350 s. Cumulative Package C10 residency 69,290 s
+  and `slp_s0_residency_usec` 64,294 s (about 93%), so the machine reaches real deep idle.
+  Battery: the 4 h 48 afternoon sleep ran on battery and went 87% to 86% (about 0.2%/h).
+  The overnight was likely on the charger (100% at 21:04), so its drain is unmeasured. No
+  iwlwifi `Microcode SW error`, `device is gone` or `Failed to start RT ucode` anywhere in the boot;
+  only the usual post-resume `authentication ... timed out` lines while wlan0 re-associates, and
+  the known `CMS0` ACPI error. `last_hw_sleep` only reflects the last cycle and read inconsistent
+  values (4095 s then 3656 s for much longer sleeps), so use the cumulative counters instead.
+  The original 14.5 h freeze did not recur in 9 h 23, so it is unexplained but unreproduced; the
+  cold-storage theory remains unproven. Test 3 (iwlwifi hook) is not needed.
 
 ## Recording the outcome
 
