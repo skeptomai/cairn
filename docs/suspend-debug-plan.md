@@ -110,7 +110,24 @@ Ctrl+Alt+F2 behaviour; whether a forced power-off was needed. Then read
   the known `CMS0` ACPI error. `last_hw_sleep` only reflects the last cycle and read inconsistent
   values (4095 s then 3656 s for much longer sleeps), so use the cumulative counters instead.
   The original 14.5 h freeze did not recur in 9 h 23, so it is unexplained but unreproduced; the
-  cold-storage theory remains unproven. Test 3 (iwlwifi hook) is not needed.
+  cold-storage theory remains unproven. (Superseded by the 2026-11-23 recurrence below.)
+
+### 5. Recurrence 2026-11-23 and mitigation (suspend-then-hibernate)
+- Lid closed 2026-11-22 20:27:28, opened 06:17:49 (9 h 50). iwlwifi was clean at suspend entry,
+  then on resume: `iwl_mvm_check_rt_status failed, device is gone during suspend` and ~15x
+  `Failed to start RT ucode: -110`; NetworkManager reported "Wi-Fi hardware radio set disabled"
+  (the dead card, not a switch; rfkill showed `hard=0` once it worked). Zero wake loops, so
+  `ec_no_wakeup=1` is working and is not the cause. Same signature as 2026-11-20/21.
+- The wedge survived a reboot and two poweroffs (~22 s and ~29 s gaps); the third boot worked.
+  Not duration-dependent (9 h 23 passed on 11-22). Firmware linux-firmware-intel 20261019.
+- Mitigation: lid close = `suspend-then-hibernate`, `HibernateDelaySec=1h`
+  (`systemd/logind-lid.conf`, `systemd/sleep-hibernate.conf`, installed by `bootstrap.sh`), so long
+  closures end in a real power-off instead of hours of s2idle.
+- Result (2026-11-23, **PASS, one cycle**): lid closed 08:06:34, s2idle for exactly 1 h, converted to
+  hibernate at 09:06:34, resumed 15:14:04 (about 6 h hibernated) with the session intact, wifi up, no
+  iwlwifi errors. Also the first hibernate resume with the dGPU disabled in BIOS. Still to watch: an
+  overnight, since the wedge was intermittent.
+  Fallback: test 3 (iwlwifi unload/reload sleep hook).
 
 ## Recording the outcome
 

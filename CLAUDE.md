@@ -68,6 +68,11 @@ mkinitcpio, limine cmdline, root-owned `/etc/greetd/*`) live in
   s2idle cycles up to 9 h 23 min worked cleanly. The original 14.5 h freeze is
   unexplained (cold storage was a theory, unproven); if it recurs, test 3 in the
   plan (unload/reload iwlwifi around sleep) is the next step.
+  **It recurred 2026-11-23** after a clean 9 h 50 s2idle (AX211 dead on resume, survived
+  a reboot and two poweroffs), so it is not the wake loop. Mitigation: lid close is
+  `suspend-then-hibernate` after 1 h (`systemd/`, installed by `bootstrap.sh`). Don't revert
+  to plain suspend without reading `docs/suspend-debug-plan.md` section 5.
+  First cycle verified 2026-11-23 (1 h s2idle, 6 h hibernate, clean resume, wifi OK, dGPU off).
 - **Greetd's keyboard layout must match the real sway session's layout
   exactly** — a real, previously-confusing bug (correct passwords looking
   like failed logins because the greeter and the real session were reading

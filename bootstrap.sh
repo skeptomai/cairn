@@ -219,6 +219,13 @@ if ! grep -q 'acpi.ec_no_wakeup=1' /etc/default/limine; then
   sudo limine-update
 fi
 
+# Lid close -> suspend-then-hibernate (hibernate after 1h). The AX211 wifi wedges after
+# multi-hour s2idle and survives reboots; a real power-off in between avoids it
+# (2026-11-23, docs/suspend-debug-plan.md). Needs the hibernate setup above.
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+sudo install -Dm644 "$REPO_DIR/systemd/logind-lid.conf" /etc/systemd/logind.conf.d/10-cairn-lid.conf
+sudo install -Dm644 "$REPO_DIR/systemd/sleep-hibernate.conf" /etc/systemd/sleep.conf.d/10-cairn-hibernate.conf
+
 cat <<'EOF'
     NOTE: if resume_offset ever needs recomputing (e.g. after any btrfs
     balance/defrag touched @swap — don't do that on purpose), re-run:
