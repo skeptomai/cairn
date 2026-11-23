@@ -11,23 +11,23 @@
 @import url('https://mwittrien.github.io/BetterDiscordAddons/Themes/DiscordRecolor/DiscordRecolor.css');
 
 :root {
-  --accentcolor: 30,102,245;
-  --accentcolor2: 182,180,173;
-  --linkcolor: 30,102,245;
-  --mentioncolor: 30,102,245;
-  --textbrightest: 46,46,46;
-  --textbrighter: 46,46,46;
-  --textbright: 46,46,46;
-  --textdark: 46,46,46;
+  --accentcolor: 16,87,239;
+  --accentcolor2: 202,202,202;
+  --linkcolor: 16,87,239;
+  --mentioncolor: 16,87,239;
+  --textbrightest: 9,10,11;
+  --textbrighter: 9,10,11;
+  --textbright: 9,10,11;
+  --textdark: 9,10,11;
   --textdarker: 110,90,85;
-  --textdarkest: 216,213,205;
+  --textdarkest: 250,250,250;
 
-  --backgroundaccent: 182,180,173;
-  --backgroundprimary: 216,213,205;
-  --backgroundsecondary: 182,180,173;
-  --backgroundsecondaryalt: 182,180,173;
-  --backgroundtertiary: 182,180,173;
-  --backgroundfloating: 182,180,173;
+  --backgroundaccent: 202,202,202;
+  --backgroundprimary: 250,250,250;
+  --backgroundsecondary: 202,202,202;
+  --backgroundsecondaryalt: 202,202,202;
+  --backgroundtertiary: 202,202,202;
+  --backgroundfloating: 202,202,202;
   --settingsicons: 0;
 }
 
@@ -39,7 +39,7 @@
   /* On bigger screens, the scrollbar's border radius falls short, so we
   put an obscenely large value for the border radius */
   border-radius: 500px !important;
-  background: rgba(30,102,245, 0.7) !important;
+  background: rgba(16,87,239, 0.7) !important;
   background-clip: content-box !important;
   border: 2px solid transparent !important; /* Margin for the scrollbar */
 }

@@ -87,6 +87,7 @@ window#waybar {
 #tray-cluster #idle_inhibitor,
 #tray-cluster #tray,
 #tray-cluster #custom-power,
+#net-cluster #custom-layout,
 #net-cluster #network,
 #net-cluster #pulseaudio,
 #net-cluster #backlight,

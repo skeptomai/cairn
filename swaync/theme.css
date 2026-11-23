@@ -2,10 +2,10 @@
  * palette TOML instead and re-run apply-theme.py.
  *
  * */
-@define-color text-color #2e2e2e;
+@define-color text-color #090a0b;
 /* was a hardcoded near-black -- invisible against a dark palette's bg;
  * self-adapts to any palette by dimming the real text color instead. */
-@define-color text-color-disabled alpha(#2e2e2e, 0.5);
+@define-color text-color-disabled alpha(#090a0b, 0.5);
 
 /*
  *
@@ -13,9 +13,9 @@
  *
  * */
 /* background */
-@define-color sw-cc-bg #d8d5cd;
+@define-color sw-cc-bg #fafafa;
 /* border */
-@define-color sw-cc-border-color #1e66f5;
+@define-color sw-cc-border-color #1057ef;
 
 .control-center {
   /* The Control Center which contains the old notifications + widgets */
@@ -33,13 +33,13 @@
 *
 * */
 /* background */
-@define-color sw-noti-window-bg #d8d5cd;
+@define-color sw-noti-window-bg #fafafa;
 /* border */
-@define-color sw-noti-window-br #1e66f5;
+@define-color sw-noti-window-br #1057ef;
 /* color */
-@define-color sw-noti-window-txt #2e2e2e;
+@define-color sw-noti-window-txt #090a0b;
 /* hover */
-@define-color sw-noti-bg-hover #b6b4ad;
+@define-color sw-noti-bg-hover #cacaca;
 
 @define-color noti-bg-hover @sw-noti-bg-hover;
 
@@ -65,9 +65,9 @@
 *
 * */
 /* foreground */
-@define-color sw-msg-sum-fg #2e2e2e;
+@define-color sw-msg-sum-fg #090a0b;
 /* body */
-@define-color sw-msg-body #2e2e2e;
+@define-color sw-msg-body #090a0b;
 
 
 .notification-row .notification-background .notification .notification-default-action .notification-content .text-box .summary {
@@ -95,11 +95,11 @@
 *
 * */
 /* icon */
-@define-color sw-noti-gr-icon #2e2e2e;
+@define-color sw-noti-gr-icon #090a0b;
 /* button */
-@define-color sw-noti-gr-collapse-but-hvr #a5a39d;
+@define-color sw-noti-gr-collapse-but-hvr #b2b2b2;
 /* icon */
-@define-color sw-noti-gr-collapse-but-icon #2e2e2e;
+@define-color sw-noti-gr-collapse-but-icon #090a0b;
 
 .notification-group .notification-group-headers .notification-group-icon {
   color: @sw-noti-gr-icon;

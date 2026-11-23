@@ -28,7 +28,7 @@
 
     "group/net-cluster": {
         "orientation": "horizontal",
-        "modules": ["network", "pulseaudio", "backlight"]
+        "modules": ["custom/layout", "network", "pulseaudio", "backlight"]
     },
 
     "group/sys-cluster": {
@@ -122,6 +122,14 @@
         "tooltip-format": "Brightness: {percent}%",
         "on-scroll-up": "swayosd-client --brightness raise",
         "on-scroll-down": "swayosd-client --brightness lower"
+    },
+
+    "custom/layout": {
+        "exec": "~/.config/waybar/layout.sh",
+        "return-type": "json",
+        "format": "\uf11c  {}",
+        "tooltip": true,
+        "on-click": "swaymsg input type:keyboard xkb_switch_layout next"
     },
 
     "cpu": {
